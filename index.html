@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PantryPal</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main>
+    <header class="card hero">
+      <p class="eyebrow">Kitchen Inventory</p>
+      <h1>PantryPal</h1>
+      <p>Mobile-first pantry tracking with AI photo scanning.</p>
+      <p id="status">Connecting...</p>
+    </header>
+
+    <section class="card scan">
+      <p class="eyebrow">AI Pantry Scanner</p>
+      <h2>Scan Pantry</h2>
+      <p>Upload or take a picture of pantry, fridge, or freezer items.</p>
+      <select id="scanLocation">
+        <option>Pantry</option>
+        <option>Fridge</option>
+        <option>Freezer</option>
+        <option>Garage Freezer</option>
+      </select>
+      <input id="photoInput" type="file" accept="image/*" capture="environment">
+      <img id="preview" class="preview hidden" alt="Preview">
+      <button id="scanBtn">Scan Photo</button>
+      <p id="scanStatus"></p>
+      <div id="scanResults"></div>
+      <button id="saveScanBtn" class="hidden">Save Selected Items</button>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Stock Entry</p>
+      <h2>Add Item</h2>
+      <form id="itemForm">
+        <input id="name" placeholder="Item name, e.g. Milk" required>
+        <select id="category">
+          <option>Dairy</option><option>Produce</option><option>Bakery</option>
+          <option>Protein</option><option>Dry Goods</option><option>Frozen</option><option>Other</option>
+        </select>
+        <select id="location">
+          <option>Fridge</option><option>Pantry</option><option>Freezer</option><option>Garage Freezer</option>
+        </select>
+        <input id="quantity" type="number" step="0.25" value="1">
+        <input id="unit" value="item">
+        <input id="bestBy" type="date">
+        <textarea id="notes" placeholder="Notes"></textarea>
+        <label><input id="lowStock" type="checkbox"> Low stock</label>
+        <button>Add to Pantry</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Inventory Board</h2>
+      <input id="search" placeholder="Search pantry">
+      <div id="inventory"></div>
+    </section>
+
+    <footer>
+      <strong>PantryPal v0.2.1</strong><br>
+      Scan Pantry enabled · ChatGPT deploy package
+    </footer>
+  </main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
