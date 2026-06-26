@@ -4,11 +4,13 @@ let items=[],scanItems=[],selectedPhotoFile=null,editingId=null;
 const $=id=>document.getElementById(id);
 const categories=["Meat","Beef","Chicken","Pork","Fish/Seafood","Deli Meat","Dairy","Eggs","Produce","Bakery","Dry Goods","Canned Goods","Condiments","Snacks","Frozen","Beverages","Household","Other"];
 const units=["item","each","count","lb","lbs","oz","g","kg","jar","can","box","bag","bottle","carton","package","pack","loaf","dozen","gallon","quart","pint","cup","tbsp","tsp","fl oz"];
-const locations=["Fridge","Pantry","Freezer","Garage Freezer"];
+const locations=["Pantry","Kitchen Cupboard 1","Kitchen Cupboard 2","Kitchen Cupboard 3","Fridge","Freezer","Garage Freezer","Basement Fridge","Small Fridge","Small Freezer"];
 init();
 function init(){
  fillSelect("category",categories,"Dry Goods");
  fillSelect("unit",units,"item");
+ fillSelect("location",locations,"Pantry");
+ fillSelect("scanLocation",locations,"Pantry");
  $("itemForm").addEventListener("submit",addManual);
  $("scanMode").addEventListener("change",updateScanHint);
  $("takePhotoBtn").addEventListener("click",()=>$("cameraInput").click());
@@ -33,7 +35,7 @@ async function load(){
  items=data||[];$("status").textContent=`Connected · ${items.length} item(s)`;$("inventoryCount").textContent=`${items.length} item${items.length===1?"":"s"}`;render();
 }
 function readForm(){return{name:$("name").value.trim(),category:$("category").value,location:$("location").value,quantity:+$("quantity").value||1,unit:$("unit").value||"item",best_by:$("bestBy").value||null,notes:$("notes").value||"",low_stock:$("lowStock").checked}}
-async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";$("category").value="Dry Goods";await load()}
+async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";$("category").value="Dry Goods";$("location").value="Pantry";await load()}
 async function insert(rows){const {error}=await db.from("pantry_items").insert(rows);if(error){alert(error.message);throw error}}
 function render(){renderInventory();renderGroceryList()}
 function renderInventory(){
