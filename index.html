@@ -9,27 +9,32 @@
 </head>
 <body>
   <main>
-    <header class="card hero">
-      <p class="eyebrow">Kitchen Inventory</p>
-      <h1>PantryPal</h1>
-      <p>Mobile-first pantry tracking with AI photo scanning.</p>
-      <p id="status">Connecting...</p>
+    <header class="hero compact-card">
+      <div>
+        <p class="eyebrow">Kitchen Inventory</p>
+        <h1>PantryPal</h1>
+        <p class="muted">Scan food, track what you have, and turn it into meals.</p>
+      </div>
+      <p id="status" class="status-pill">Connecting...</p>
     </header>
 
-    <section class="card scan">
-      <p class="eyebrow">AI Pantry Scanner</p>
-      <h2>Scan Pantry</h2>
-      <p>Upload or take a picture of pantry, fridge, or freezer items.</p>
-      <select id="scanLocation">
-        <option>Pantry</option>
-        <option>Fridge</option>
-        <option>Freezer</option>
-        <option>Garage Freezer</option>
-      </select>
+    <section class="compact-card scan">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Scanner</p>
+          <h2>Scan Food</h2>
+        </div>
+        <select id="scanLocation" class="small-select">
+          <option>Pantry</option>
+          <option>Fridge</option>
+          <option>Freezer</option>
+          <option>Garage Freezer</option>
+        </select>
+      </div>
 
-      <div class="photo-actions">
+      <div class="photo-actions two-col">
         <button id="takePhotoBtn" type="button">Take Photo</button>
-        <button id="uploadPhotoBtn" type="button">Upload Existing Photo</button>
+        <button id="uploadPhotoBtn" type="button" class="secondary">Upload Photo</button>
       </div>
 
       <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
@@ -37,25 +42,31 @@
 
       <img id="preview" class="preview hidden" alt="Preview">
       <button id="scanBtn">Scan Photo</button>
-      <p id="scanStatus"></p>
+      <p id="scanStatus" class="status-text"></p>
       <div id="scanResults"></div>
       <button id="saveScanBtn" class="hidden">Save Selected Items</button>
     </section>
 
-    <section class="card">
-      <p class="eyebrow">Stock Entry</p>
-      <h2>Add Item</h2>
-      <form id="itemForm">
+    <section class="compact-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Stock Entry</p>
+          <h2>Add Item</h2>
+        </div>
+      </div>
+      <form id="itemForm" class="tight-form">
         <input id="name" placeholder="Item name, e.g. Milk" required>
-        <select id="category">
-          <option>Dairy</option><option>Produce</option><option>Bakery</option>
-          <option>Protein</option><option>Dry Goods</option><option>Frozen</option><option>Other</option>
-        </select>
-        <select id="location">
-          <option>Fridge</option><option>Pantry</option><option>Freezer</option><option>Garage Freezer</option>
-        </select>
-        <input id="quantity" type="number" step="0.25" value="1">
-        <input id="unit" value="item">
+        <div class="grid">
+          <select id="category">
+            <option>Dairy</option><option>Produce</option><option>Bakery</option>
+            <option>Protein</option><option>Dry Goods</option><option>Frozen</option><option>Other</option>
+          </select>
+          <select id="location">
+            <option>Fridge</option><option>Pantry</option><option>Freezer</option><option>Garage Freezer</option>
+          </select>
+          <input id="quantity" type="number" step="0.25" value="1">
+          <input id="unit" value="item">
+        </div>
         <input id="bestBy" type="date">
         <textarea id="notes" placeholder="Notes"></textarea>
         <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
@@ -63,22 +74,53 @@
       </form>
     </section>
 
-    <section class="card">
-      <p class="eyebrow">Shopping</p>
-      <h2>Grocery List</h2>
-      <p>Items marked low stock show up here.</p>
+    <section class="compact-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Shopping</p>
+          <h2>Grocery List</h2>
+        </div>
+      </div>
       <div id="groceryList"></div>
     </section>
 
-    <section class="card inventory-card">
-      <h2>Inventory Board</h2>
-      <input id="search" placeholder="Search pantry">
+    <section class="compact-card recipe-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Meals</p>
+          <h2>Recipe Ideas</h2>
+          <p class="muted">Uses your current inventory and tells you what you are missing.</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <select id="recipeStyle">
+          <option value="family friendly quick dinners">Family-friendly quick dinners</option>
+          <option value="kid friendly meals">Kid-friendly meals</option>
+          <option value="high protein meals">High-protein meals</option>
+          <option value="cheap pantry meals">Cheap pantry meals</option>
+          <option value="healthy simple meals">Healthy simple meals</option>
+        </select>
+        <button id="recipeBtn" type="button">Get Recipe Ideas</button>
+      </div>
+      <p id="recipeStatus" class="status-text"></p>
+      <div id="recipeIdeas"></div>
+    </section>
+
+    <section class="compact-card inventory-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Inventory</p>
+          <h2>Inventory Board</h2>
+        </div>
+        <span id="inventoryCount" class="status-pill">0 items</span>
+      </div>
+      <input id="search" placeholder="Search name, place, or category">
       <div id="inventory"></div>
     </section>
 
     <footer>
-      <strong>PantryPal v0.3.0</strong><br>
-      Edit items · Low-stock grocery list · AI photo scanning
+      <strong>PantryPal v0.4.0</strong><br>
+      Condensed layout · Recipe ideas · Grocery list · AI scanning
     </footer>
   </main>
   <script src="config.js"></script>
