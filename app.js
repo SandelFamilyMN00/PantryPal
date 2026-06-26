@@ -2,10 +2,13 @@ const cfg=window.PANTRYPAL_CONFIG;
 const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
 let items=[],scanItems=[],selectedPhotoFile=null,editingId=null;
 const $=id=>document.getElementById(id);
-const categories=["Dairy","Produce","Bakery","Protein","Dry Goods","Frozen","Other"];
+const categories=["Meat","Beef","Chicken","Pork","Fish/Seafood","Deli Meat","Dairy","Eggs","Produce","Bakery","Dry Goods","Canned Goods","Condiments","Snacks","Frozen","Beverages","Household","Other"];
+const units=["item","each","count","lb","lbs","oz","g","kg","jar","can","box","bag","bottle","carton","package","pack","loaf","dozen","gallon","quart","pint","cup","tbsp","tsp","fl oz"];
 const locations=["Fridge","Pantry","Freezer","Garage Freezer"];
 init();
 function init(){
+ fillSelect("category",categories,"Dry Goods");
+ fillSelect("unit",units,"item");
  $("itemForm").addEventListener("submit",addManual);
  $("takePhotoBtn").addEventListener("click",()=>$("cameraInput").click());
  $("uploadPhotoBtn").addEventListener("click",()=>$("uploadInput").click());
@@ -24,16 +27,16 @@ async function load(){
  items=data||[];$("status").textContent=`Connected · ${items.length} item(s)`;$("inventoryCount").textContent=`${items.length} item${items.length===1?"":"s"}`;render();
 }
 function readForm(){return{name:$("name").value.trim(),category:$("category").value,location:$("location").value,quantity:+$("quantity").value||1,unit:$("unit").value||"item",best_by:$("bestBy").value||null,notes:$("notes").value||"",low_stock:$("lowStock").checked}}
-async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";await load()}
+async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";$("category").value="Dry Goods";await load()}
 async function insert(rows){const {error}=await db.from("pantry_items").insert(rows);if(error){alert(error.message);throw error}}
 function render(){renderInventory();renderGroceryList()}
 function renderInventory(){
  const q=$("search").value.toLowerCase();
- const list=items.filter(i=>!q||(i.name||"").toLowerCase().includes(q)||(i.location||"").toLowerCase().includes(q)||(i.category||"").toLowerCase().includes(q));
+ const list=items.filter(i=>!q||(i.name||"").toLowerCase().includes(q)||(i.location||"").toLowerCase().includes(q)||(i.category||"").toLowerCase().includes(q)||(i.unit||"").toLowerCase().includes(q));
  $("inventory").innerHTML=list.length?list.map(i=>editingId===i.id?editCard(i):itemCard(i)).join(""):"<p>No matching items.</p>";
 }
 function itemCard(i){return `<div class="item"><div class="item-head"><div><h3>${esc(i.name)}</h3><p>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)} · ${esc(i.category)}</p></div>${i.low_stock?'<span class="pill">Low stock</span>':""}</div>${i.best_by?`<p class="meta">Best by: ${esc(i.best_by)}</p>`:""}${i.notes?`<p class="notes">${esc(i.notes)}</p>`:""}<div class="button-row"><button onclick="startEdit('${i.id}')">Edit</button><button class="secondary" onclick="toggleLow('${i.id}',${!i.low_stock})">${i.low_stock?"Remove from List":"Add to List"}</button><button class="danger" onclick="del('${i.id}')">Delete</button></div></div>`}
-function editCard(i){return `<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-${i.id}" value="${esc(i.name)}" placeholder="Item name"><div class="grid"><select id="edit-category-${i.id}">${options(categories,i.category)}</select><select id="edit-location-${i.id}">${options(locations,i.location)}</select><input id="edit-quantity-${i.id}" type="number" step="0.25" value="${esc(i.quantity)}"><input id="edit-unit-${i.id}" value="${esc(i.unit)}"></div><input id="edit-best-${i.id}" type="date" value="${esc(i.best_by||"")}"><textarea id="edit-notes-${i.id}" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input id="edit-low-${i.id}" type="checkbox" ${i.low_stock?"checked":""}> Low stock / add to grocery list</label><div class="button-row two-actions"><button onclick="saveEdit('${i.id}')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>`}
+function editCard(i){return `<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-${i.id}" value="${esc(i.name)}" placeholder="Item name"><div class="grid"><select id="edit-category-${i.id}">${options(categories,i.category)}</select><select id="edit-location-${i.id}">${options(locations,i.location)}</select><input id="edit-quantity-${i.id}" type="number" step="0.25" value="${esc(i.quantity)}"><select id="edit-unit-${i.id}">${options(units,i.unit)}</select></div><input id="edit-best-${i.id}" type="date" value="${esc(i.best_by||"")}"><textarea id="edit-notes-${i.id}" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input id="edit-low-${i.id}" type="checkbox" ${i.low_stock?"checked":""}> Low stock / add to grocery list</label><div class="button-row two-actions"><button onclick="saveEdit('${i.id}')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>`}
 function renderGroceryList(){
  const low=items.filter(i=>i.low_stock);
  $("groceryList").innerHTML=low.length?low.map(i=>`<div class="grocery-item"><strong>${esc(i.name)}</strong><span>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)}</span><button class="secondary small" onclick="toggleLow('${i.id}',false)">Got it</button></div>`).join(""):"<p class='muted'>No low-stock items yet. Tap “Add to List” on an inventory item.</p>";
@@ -64,12 +67,12 @@ async function scanPhoto(){
   const r=await fetch("/scan-pantry",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mimeType:"image/jpeg",location:$("scanLocation").value})});
   const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||`Server returned ${r.status}`)}
   if(!r.ok)throw new Error(data.error||`Scan failed with status ${r.status}`);
-  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:x.category||"Other",location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:x.unit||"item",best_by:x.expiration_date||x.best_by||null,notes:x.confidence?`AI confidence: ${x.confidence}`:"",low_stock:false}));
+  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:normalizeCategory(x.category),location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:normalizeUnit(x.unit),best_by:x.expiration_date||x.best_by||null,notes:x.confidence?`AI confidence: ${x.confidence}`:"",low_stock:false}));
   renderScan();$("scanStatus").textContent=`Found ${scanItems.length} item(s). Review before saving.`;
  }catch(e){$("scanStatus").textContent="Scan error: "+e.message}
 }
 function renderScan(){
- $("scanResults").innerHTML=scanItems.map((i,n)=>`<div class="scan-card" data-i="${n}"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="${esc(i.name)}" placeholder="Name"><div class="grid"><select class="c">${options(categories,i.category)}</select><select class="l">${options(locations,i.location)}</select><input class="q" type="number" step="0.25" value="${esc(i.quantity)}"><input class="u" value="${esc(i.unit)}"></div><input class="b" type="date" value="${esc(i.best_by||"")}"><textarea class="notes-input" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock / add to grocery list</label></div>`).join("");
+ $("scanResults").innerHTML=scanItems.map((i,n)=>`<div class="scan-card" data-i="${n}"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="${esc(i.name)}" placeholder="Name"><div class="grid"><select class="c">${options(categories,i.category)}</select><select class="l">${options(locations,i.location)}</select><input class="q" type="number" step="0.25" value="${esc(i.quantity)}"><select class="u">${options(units,i.unit)}</select></div><input class="b" type="date" value="${esc(i.best_by||"")}"><textarea class="notes-input" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock / add to grocery list</label></div>`).join("");
  $("saveScanBtn").classList.remove("hidden");
 }
 async function saveScan(){
@@ -94,5 +97,8 @@ function renderRecipes(recipes){
  $("recipeIdeas").innerHTML=recipes.length?recipes.map(r=>`<div class="recipe"><div class="item-head"><h3>${esc(r.name)}</h3><span class="pill">${esc(r.time||"Quick")}</span></div><p>${esc(r.why||"")}</p><p><strong>Use:</strong> ${(r.use||[]).map(esc).join(", ")}</p>${(r.missing||[]).length?`<p><strong>Missing:</strong> ${r.missing.map(esc).join(", ")}</p>`:`<p><strong>Missing:</strong> Nothing obvious</p>`}<ol>${(r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>`).join(""):"<p class='muted'>No recipe ideas came back. Add a few more useful ingredients and try again.</p>";
 }
 function imageToJpegBase64(file,maxSize=1280,quality=0.78){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{try{let {width,height}=img;const scale=Math.min(1,maxSize/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,width,height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1])}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Could not read image"))};img.src=url})}
+function normalizeCategory(v){const s=String(v||"").toLowerCase();if(s.includes("beef"))return"Beef";if(s.includes("chicken")||s.includes("poultry"))return"Chicken";if(s.includes("pork")||s.includes("bacon")||s.includes("ham"))return"Pork";if(s.includes("fish")||s.includes("seafood")||s.includes("shrimp")||s.includes("tuna"))return"Fish/Seafood";if(s.includes("meat")||s.includes("protein"))return"Meat";if(s.includes("egg"))return"Eggs";if(s.includes("dairy"))return"Dairy";if(s.includes("produce")||s.includes("fruit")||s.includes("vegetable"))return"Produce";if(s.includes("can"))return"Canned Goods";if(s.includes("condiment")||s.includes("sauce"))return"Condiments";if(s.includes("snack"))return"Snacks";if(s.includes("frozen"))return"Frozen";return categories.find(c=>c.toLowerCase()===s)||"Other"}
+function normalizeUnit(v){const s=String(v||"item").toLowerCase().trim();if(["pound","pounds","lb","lbs"].includes(s))return"lbs";if(["ounce","ounces","oz"].includes(s))return"oz";if(["each","count","ct"].includes(s))return"each";return units.find(u=>u.toLowerCase()===s)||"item"}
+function fillSelect(id,arr,current){$(id).innerHTML=options(arr,current)}
 function options(arr,current){return arr.map(v=>`<option ${String(v).toLowerCase()===String(current||"").toLowerCase()?"selected":""}>${esc(v)}</option>`).join("")}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
