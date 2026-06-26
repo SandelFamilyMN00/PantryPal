@@ -10,6 +10,7 @@ function init(){
  fillSelect("category",categories,"Dry Goods");
  fillSelect("unit",units,"item");
  $("itemForm").addEventListener("submit",addManual);
+ $("scanMode").addEventListener("change",updateScanHint);
  $("takePhotoBtn").addEventListener("click",()=>$("cameraInput").click());
  $("uploadPhotoBtn").addEventListener("click",()=>$("uploadInput").click());
  $("cameraInput").addEventListener("change",previewPhoto);
@@ -18,7 +19,12 @@ function init(){
  $("saveScanBtn").addEventListener("click",saveScan);
  $("search").addEventListener("input",render);
  $("recipeBtn").addEventListener("click",getRecipeIdeas);
+ updateScanHint();
  load();
+}
+function updateScanHint(){
+ const mode=$("scanMode").value;
+ $("scanHint").textContent=mode==="meat_label"?"Meat label mode: take one close, straight-on photo of the store label so weight, price label, and sell/use-by date are readable.":"General mode: scan pantry, fridge, freezer, or package fronts. For dates and weights, get the label clearly in frame.";
 }
 async function load(){
  $("status").textContent="Loading...";
@@ -60,19 +66,26 @@ function previewPhoto(e){
 async function scanPhoto(){
  const f=selectedPhotoFile;
  if(!f){$("scanStatus").textContent="Choose or take a photo first.";return}
- $("scanStatus").textContent="Preparing photo...";
+ const scanMode=$("scanMode").value;
+ $("scanStatus").textContent=scanMode==="meat_label"?"Preparing label photo...":"Preparing photo...";
  try{
-  const imageBase64=await imageToJpegBase64(f,1280,0.78);
-  $("scanStatus").textContent="Scanning...";
-  const r=await fetch("/scan-pantry",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mimeType:"image/jpeg",location:$("scanLocation").value})});
+  const imageBase64=await imageToJpegBase64(f,scanMode==="meat_label"?1600:1280,0.82);
+  $("scanStatus").textContent=scanMode==="meat_label"?"Reading meat label...":"Scanning...";
+  const r=await fetch("/scan-pantry",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mimeType:"image/jpeg",location:$("scanLocation").value,scanMode})});
   const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||`Server returned ${r.status}`)}
   if(!r.ok)throw new Error(data.error||`Scan failed with status ${r.status}`);
-  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:normalizeCategory(x.category),location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:normalizeUnit(x.unit),best_by:x.expiration_date||x.best_by||null,notes:x.confidence?`AI confidence: ${x.confidence}`:"",low_stock:false}));
+  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:normalizeCategory(x.category),location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:normalizeUnit(x.unit),best_by:x.expiration_date||x.best_by||null,notes:scanNotes(x,scanMode),low_stock:false}));
   renderScan();$("scanStatus").textContent=`Found ${scanItems.length} item(s). Review before saving.`;
  }catch(e){$("scanStatus").textContent="Scan error: "+e.message}
 }
+function scanNotes(x,mode){
+ const notes=[];
+ if(x.confidence)notes.push(`AI confidence: ${x.confidence}`);
+ if(mode==="meat_label")notes.push("Label scan: verify weight and date before freezing or cooking.");
+ return notes.join(" · ");
+}
 function renderScan(){
- $("scanResults").innerHTML=scanItems.map((i,n)=>`<div class="scan-card" data-i="${n}"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="${esc(i.name)}" placeholder="Name"><div class="grid"><select class="c">${options(categories,i.category)}</select><select class="l">${options(locations,i.location)}</select><input class="q" type="number" step="0.25" value="${esc(i.quantity)}"><select class="u">${options(units,i.unit)}</select></div><input class="b" type="date" value="${esc(i.best_by||"")}"><textarea class="notes-input" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock / add to grocery list</label></div>`).join("");
+ $("scanResults").innerHTML=scanItems.map((i,n)=>`<div class="scan-card" data-i="${n}"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="${esc(i.name)}" placeholder="Name"><div class="grid"><select class="c">${options(categories,i.category)}</select><select class="l">${options(locations,i.location)}</select><input class="q" type="number" step="0.01" value="${esc(i.quantity)}"><select class="u">${options(units,i.unit)}</select></div><input class="b" type="date" value="${esc(i.best_by||"")}"><textarea class="notes-input" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock / add to grocery list</label></div>`).join("");
  $("saveScanBtn").classList.remove("hidden");
 }
 async function saveScan(){
@@ -97,7 +110,7 @@ function renderRecipes(recipes){
  $("recipeIdeas").innerHTML=recipes.length?recipes.map(r=>`<div class="recipe"><div class="item-head"><h3>${esc(r.name)}</h3><span class="pill">${esc(r.time||"Quick")}</span></div><p>${esc(r.why||"")}</p><p><strong>Use:</strong> ${(r.use||[]).map(esc).join(", ")}</p>${(r.missing||[]).length?`<p><strong>Missing:</strong> ${r.missing.map(esc).join(", ")}</p>`:`<p><strong>Missing:</strong> Nothing obvious</p>`}<ol>${(r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>`).join(""):"<p class='muted'>No recipe ideas came back. Add a few more useful ingredients and try again.</p>";
 }
 function imageToJpegBase64(file,maxSize=1280,quality=0.78){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{try{let {width,height}=img;const scale=Math.min(1,maxSize/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,width,height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1])}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Could not read image"))};img.src=url})}
-function normalizeCategory(v){const s=String(v||"").toLowerCase();if(s.includes("beef"))return"Beef";if(s.includes("chicken")||s.includes("poultry"))return"Chicken";if(s.includes("pork")||s.includes("bacon")||s.includes("ham"))return"Pork";if(s.includes("fish")||s.includes("seafood")||s.includes("shrimp")||s.includes("tuna"))return"Fish/Seafood";if(s.includes("meat")||s.includes("protein"))return"Meat";if(s.includes("egg"))return"Eggs";if(s.includes("dairy"))return"Dairy";if(s.includes("produce")||s.includes("fruit")||s.includes("vegetable"))return"Produce";if(s.includes("can"))return"Canned Goods";if(s.includes("condiment")||s.includes("sauce"))return"Condiments";if(s.includes("snack"))return"Snacks";if(s.includes("frozen"))return"Frozen";return categories.find(c=>c.toLowerCase()===s)||"Other"}
+function normalizeCategory(v){const s=String(v||"").toLowerCase();if(s.includes("beef"))return"Beef";if(s.includes("chicken")||s.includes("poultry"))return"Chicken";if(s.includes("pork")||s.includes("bacon")||s.includes("ham"))return"Pork";if(s.includes("fish")||s.includes("seafood")||s.includes("shrimp")||s.includes("tuna"))return"Fish/Seafood";if(s.includes("deli"))return"Deli Meat";if(s.includes("meat")||s.includes("protein"))return"Meat";if(s.includes("egg"))return"Eggs";if(s.includes("dairy"))return"Dairy";if(s.includes("produce")||s.includes("fruit")||s.includes("vegetable"))return"Produce";if(s.includes("can"))return"Canned Goods";if(s.includes("condiment")||s.includes("sauce"))return"Condiments";if(s.includes("snack"))return"Snacks";if(s.includes("frozen"))return"Frozen";return categories.find(c=>c.toLowerCase()===s)||"Other"}
 function normalizeUnit(v){const s=String(v||"item").toLowerCase().trim();if(["pound","pounds","lb","lbs"].includes(s))return"lbs";if(["ounce","ounces","oz"].includes(s))return"oz";if(["each","count","ct"].includes(s))return"each";return units.find(u=>u.toLowerCase()===s)||"item"}
 function fillSelect(id,arr,current){$(id).innerHTML=options(arr,current)}
 function options(arr,current){return arr.map(v=>`<option ${String(v).toLowerCase()===String(current||"").toLowerCase()?"selected":""}>${esc(v)}</option>`).join("")}
