@@ -1,11 +1,14 @@
 const cfg=window.PANTRYPAL_CONFIG;
 const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-let items=[],scanItems=[];
+let items=[],scanItems=[],selectedPhotoFile=null;
 const $=id=>document.getElementById(id);
 init();
 function init(){
  $("itemForm").addEventListener("submit",addManual);
- $("photoInput").addEventListener("change",previewPhoto);
+ $("takePhotoBtn").addEventListener("click",()=>$("cameraInput").click());
+ $("uploadPhotoBtn").addEventListener("click",()=>$("uploadInput").click());
+ $("cameraInput").addEventListener("change",previewPhoto);
+ $("uploadInput").addEventListener("change",previewPhoto);
  $("scanBtn").addEventListener("click",scanPhoto);
  $("saveScanBtn").addEventListener("click",saveScan);
  $("search").addEventListener("input",render);
@@ -26,15 +29,26 @@ function render(){
  $("inventory").innerHTML=list.length?list.map(i=>`<div class="item"><h3>${esc(i.name)}</h3><p>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)} · ${esc(i.category)}</p>${i.best_by?`<p>Best by: ${esc(i.best_by)}</p>`:""}<button onclick="del('${i.id}')">Delete</button></div>`).join(""):"<p>No matching items.</p>";
 }
 async function del(id){await db.from("pantry_items").delete().eq("id",id);await load()}
-function previewPhoto(){const f=$("photoInput").files[0];if(!f)return;$("preview").src=URL.createObjectURL(f);$("preview").classList.remove("hidden");$("scanStatus").textContent="Photo selected."}
+function previewPhoto(e){
+ const f=e.target.files[0];
+ if(!f)return;
+ selectedPhotoFile=f;
+ scanItems=[];
+ $("scanResults").innerHTML="";
+ $("saveScanBtn").classList.add("hidden");
+ $("preview").src=URL.createObjectURL(f);
+ $("preview").classList.remove("hidden");
+ $("scanStatus").textContent=`Photo selected: ${f.name||"camera photo"}`;
+}
 async function scanPhoto(){
- const f=$("photoInput").files[0];if(!f){$("scanStatus").textContent="Choose a photo first.";return}
+ const f=selectedPhotoFile;
+ if(!f){$("scanStatus").textContent="Choose or take a photo first.";return}
  $("scanStatus").textContent="Scanning...";
  try{
   const imageBase64=await toBase64(f);
   const r=await fetch("/scan-pantry",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,location:$("scanLocation").value})});
   const data=await r.json(); if(!r.ok)throw new Error(data.error||"Scan failed");
-  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:x.category||"Other",location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:x.unit||"item",best_by:x.expiration_date||null,notes:x.confidence?`AI confidence: ${x.confidence}`:"",low_stock:false}));
+  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:x.category||"Other",location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:x.unit||"item",best_by:x.expiration_date||x.best_by||null,notes:x.confidence?`AI confidence: ${x.confidence}`:"",low_stock:false}));
   renderScan();$("scanStatus").textContent=`Found ${scanItems.length} item(s).`;
  }catch(e){$("scanStatus").textContent="Scan error: "+e.message}
 }
@@ -43,7 +57,7 @@ function renderScan(){
  $("saveScanBtn").classList.remove("hidden");
 }
 async function saveScan(){
- const rows=[...document.querySelectorAll(".scan-card")].filter(c=>c.querySelector(".save").checked).map(c=>({name:c.querySelector(".n").value,category:c.querySelector(".c").value,quantity:+c.querySelector(".q").value||1,unit:c.querySelector(".u").value,location:$("scanLocation").value,low_stock:false}));
+ const rows=[...document.querySelectorAll(".scan-card")].filter(c=>c.querySelector(".save").checked).map(c=>{const i=scanItems[+c.dataset.i];return{name:c.querySelector(".n").value,category:c.querySelector(".c").value,quantity:+c.querySelector(".q").value||1,unit:c.querySelector(".u").value,location:i.location||$("scanLocation").value,best_by:i.best_by||null,notes:i.notes||"",low_stock:false}});
  await insert(rows);$("scanResults").innerHTML="";$("saveScanBtn").classList.add("hidden");await load();
 }
 function toBase64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=rej;r.readAsDataURL(f)})}
