@@ -26,7 +26,15 @@
         <option>Freezer</option>
         <option>Garage Freezer</option>
       </select>
-      <input id="photoInput" type="file" accept="image/*" capture="environment">
+
+      <div class="photo-actions">
+        <button id="takePhotoBtn" type="button">Take Photo</button>
+        <button id="uploadPhotoBtn" type="button">Upload Existing Photo</button>
+      </div>
+
+      <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+      <input id="uploadInput" type="file" accept="image/*" class="hidden">
+
       <img id="preview" class="preview hidden" alt="Preview">
       <button id="scanBtn">Scan Photo</button>
       <p id="scanStatus"></p>
@@ -62,7 +70,7 @@
     </section>
 
     <footer>
-      <strong>PantryPal v0.2.1</strong><br>
+      <strong>PantryPal v0.2.2</strong><br>
       Scan Pantry enabled · ChatGPT deploy package
     </footer>
   </main>
