@@ -9,3 +9,8 @@
   from = "/scan-pantry"
   to = "/.netlify/functions/scan-pantry"
   status = 200
+
+[[redirects]]
+  from = "/recipe-ideas"
+  to = "/.netlify/functions/recipe-ideas"
+  status = 200
