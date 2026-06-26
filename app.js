@@ -14,13 +14,14 @@ function init(){
  $("scanBtn").addEventListener("click",scanPhoto);
  $("saveScanBtn").addEventListener("click",saveScan);
  $("search").addEventListener("input",render);
+ $("recipeBtn").addEventListener("click",getRecipeIdeas);
  load();
 }
 async function load(){
  $("status").textContent="Loading...";
  const {data,error}=await db.from("pantry_items").select("*").order("created_at",{ascending:false});
  if(error){$("status").textContent="Database error: "+error.message;return}
- items=data||[];$("status").textContent=`Connected · ${items.length} item(s)`;render();
+ items=data||[];$("status").textContent=`Connected · ${items.length} item(s)`;$("inventoryCount").textContent=`${items.length} item${items.length===1?"":"s"}`;render();
 }
 function readForm(){return{name:$("name").value.trim(),category:$("category").value,location:$("location").value,quantity:+$("quantity").value||1,unit:$("unit").value||"item",best_by:$("bestBy").value||null,notes:$("notes").value||"",low_stock:$("lowStock").checked}}
 async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";await load()}
@@ -31,11 +32,11 @@ function renderInventory(){
  const list=items.filter(i=>!q||(i.name||"").toLowerCase().includes(q)||(i.location||"").toLowerCase().includes(q)||(i.category||"").toLowerCase().includes(q));
  $("inventory").innerHTML=list.length?list.map(i=>editingId===i.id?editCard(i):itemCard(i)).join(""):"<p>No matching items.</p>";
 }
-function itemCard(i){return `<div class="item"><div class="item-head"><h3>${esc(i.name)}</h3>${i.low_stock?'<span class="pill">Low stock</span>':""}</div><p>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)} · ${esc(i.category)}</p>${i.best_by?`<p>Best by: ${esc(i.best_by)}</p>`:""}${i.notes?`<p class="notes">${esc(i.notes)}</p>`:""}<div class="button-row"><button onclick="startEdit('${i.id}')">Edit</button><button class="secondary" onclick="toggleLow('${i.id}',${!i.low_stock})">${i.low_stock?"Remove from Grocery List":"Add to Grocery List"}</button><button class="danger" onclick="del('${i.id}')">Delete</button></div></div>`}
-function editCard(i){return `<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-${i.id}" value="${esc(i.name)}" placeholder="Item name"><div class="grid"><select id="edit-category-${i.id}">${options(categories,i.category)}</select><select id="edit-location-${i.id}">${options(locations,i.location)}</select><input id="edit-quantity-${i.id}" type="number" step="0.25" value="${esc(i.quantity)}"><input id="edit-unit-${i.id}" value="${esc(i.unit)}"></div><input id="edit-best-${i.id}" type="date" value="${esc(i.best_by||"")}"><textarea id="edit-notes-${i.id}" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input id="edit-low-${i.id}" type="checkbox" ${i.low_stock?"checked":""}> Low stock / add to grocery list</label><div class="button-row"><button onclick="saveEdit('${i.id}')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>`}
+function itemCard(i){return `<div class="item"><div class="item-head"><div><h3>${esc(i.name)}</h3><p>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)} · ${esc(i.category)}</p></div>${i.low_stock?'<span class="pill">Low stock</span>':""}</div>${i.best_by?`<p class="meta">Best by: ${esc(i.best_by)}</p>`:""}${i.notes?`<p class="notes">${esc(i.notes)}</p>`:""}<div class="button-row"><button onclick="startEdit('${i.id}')">Edit</button><button class="secondary" onclick="toggleLow('${i.id}',${!i.low_stock})">${i.low_stock?"Remove from List":"Add to List"}</button><button class="danger" onclick="del('${i.id}')">Delete</button></div></div>`}
+function editCard(i){return `<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-${i.id}" value="${esc(i.name)}" placeholder="Item name"><div class="grid"><select id="edit-category-${i.id}">${options(categories,i.category)}</select><select id="edit-location-${i.id}">${options(locations,i.location)}</select><input id="edit-quantity-${i.id}" type="number" step="0.25" value="${esc(i.quantity)}"><input id="edit-unit-${i.id}" value="${esc(i.unit)}"></div><input id="edit-best-${i.id}" type="date" value="${esc(i.best_by||"")}"><textarea id="edit-notes-${i.id}" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input id="edit-low-${i.id}" type="checkbox" ${i.low_stock?"checked":""}> Low stock / add to grocery list</label><div class="button-row two-actions"><button onclick="saveEdit('${i.id}')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>`}
 function renderGroceryList(){
  const low=items.filter(i=>i.low_stock);
- $("groceryList").innerHTML=low.length?low.map(i=>`<div class="grocery-item"><strong>${esc(i.name)}</strong><span>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)}</span><button class="secondary small" onclick="toggleLow('${i.id}',false)">Got it</button></div>`).join(""):"<p>No low-stock items yet. Tap “Add to Grocery List” on an inventory item.</p>";
+ $("groceryList").innerHTML=low.length?low.map(i=>`<div class="grocery-item"><strong>${esc(i.name)}</strong><span>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)}</span><button class="secondary small" onclick="toggleLow('${i.id}',false)">Got it</button></div>`).join(""):"<p class='muted'>No low-stock items yet. Tap “Add to List” on an inventory item.</p>";
 }
 function startEdit(id){editingId=id;renderInventory()}
 function cancelEdit(){editingId=null;renderInventory()}
@@ -75,6 +76,22 @@ async function saveScan(){
  const rows=[...document.querySelectorAll(".scan-card")].filter(c=>c.querySelector(".save").checked).map(c=>({name:c.querySelector(".n").value.trim(),category:c.querySelector(".c").value,quantity:+c.querySelector(".q").value||1,unit:c.querySelector(".u").value||"item",location:c.querySelector(".l").value,best_by:c.querySelector(".b").value||null,notes:c.querySelector(".notes-input").value||"",low_stock:c.querySelector(".low").checked})).filter(r=>r.name);
  if(!rows.length){$("scanStatus").textContent="No checked items to save.";return}
  await insert(rows);$("scanResults").innerHTML="";$("saveScanBtn").classList.add("hidden");$("scanStatus").textContent=`Saved ${rows.length} item(s).`;await load();
+}
+async function getRecipeIdeas(){
+ if(!items.length){$("recipeStatus").textContent="Add or scan some inventory first.";return}
+ $("recipeStatus").textContent="Building ideas from your inventory...";
+ $("recipeIdeas").innerHTML="";
+ try{
+  const inventory=items.slice(0,80).map(i=>({name:i.name,category:i.category,location:i.location,quantity:i.quantity,unit:i.unit,best_by:i.best_by,notes:i.notes}));
+  const r=await fetch("/recipe-ideas",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({inventory,style:$("recipeStyle").value})});
+  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||`Server returned ${r.status}`)}
+  if(!r.ok)throw new Error(data.error||`Recipe request failed with status ${r.status}`);
+  renderRecipes(data.recipes||[]);
+  $("recipeStatus").textContent=`Found ${(data.recipes||[]).length} idea(s).`;
+ }catch(e){$("recipeStatus").textContent="Recipe error: "+e.message}
+}
+function renderRecipes(recipes){
+ $("recipeIdeas").innerHTML=recipes.length?recipes.map(r=>`<div class="recipe"><div class="item-head"><h3>${esc(r.name)}</h3><span class="pill">${esc(r.time||"Quick")}</span></div><p>${esc(r.why||"")}</p><p><strong>Use:</strong> ${(r.use||[]).map(esc).join(", ")}</p>${(r.missing||[]).length?`<p><strong>Missing:</strong> ${r.missing.map(esc).join(", ")}</p>`:`<p><strong>Missing:</strong> Nothing obvious</p>`}<ol>${(r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>`).join(""):"<p class='muted'>No recipe ideas came back. Add a few more useful ingredients and try again.</p>";
 }
 function imageToJpegBase64(file,maxSize=1280,quality=0.78){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{try{let {width,height}=img;const scale=Math.min(1,maxSize/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,width,height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1])}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Could not read image"))};img.src=url})}
 function options(arr,current){return arr.map(v=>`<option ${String(v).toLowerCase()===String(current||"").toLowerCase()?"selected":""}>${esc(v)}</option>`).join("")}
