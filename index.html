@@ -58,20 +58,27 @@
         <input id="unit" value="item">
         <input id="bestBy" type="date">
         <textarea id="notes" placeholder="Notes"></textarea>
-        <label><input id="lowStock" type="checkbox"> Low stock</label>
+        <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
         <button>Add to Pantry</button>
       </form>
     </section>
 
     <section class="card">
+      <p class="eyebrow">Shopping</p>
+      <h2>Grocery List</h2>
+      <p>Items marked low stock show up here.</p>
+      <div id="groceryList"></div>
+    </section>
+
+    <section class="card inventory-card">
       <h2>Inventory Board</h2>
       <input id="search" placeholder="Search pantry">
       <div id="inventory"></div>
     </section>
 
     <footer>
-      <strong>PantryPal v0.2.2</strong><br>
-      Scan Pantry enabled · ChatGPT deploy package
+      <strong>PantryPal v0.3.0</strong><br>
+      Edit items · Low-stock grocery list · AI photo scanning
     </footer>
   </main>
   <script src="config.js"></script>
