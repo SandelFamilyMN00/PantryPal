@@ -2,10 +2,15 @@ exports.handler=async function(event){
  if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
  if(!process.env.OPENAI_API_KEY)return json(500,{error:"Missing OPENAI_API_KEY in Netlify environment variables"});
  try{
-  const {imageBase64,mimeType="image/jpeg",location="Pantry"}=JSON.parse(event.body||"{}");
+  const {imageBase64,mimeType="image/jpeg",location="Pantry",scanMode="general"}=JSON.parse(event.body||"{}");
   if(!imageBase64)return json(400,{error:"Missing imageBase64"});
 
-  const prompt=`Identify visible grocery, pantry, fridge, or freezer items in this image. Return only JSON with this shape: {"items":[{"name":"","category":"Meat|Beef|Chicken|Pork|Fish/Seafood|Deli Meat|Dairy|Eggs|Produce|Bakery|Dry Goods|Canned Goods|Condiments|Snacks|Frozen|Beverages|Household|Other","quantity":"1","unit":"item|each|count|lb|lbs|oz|g|kg|jar|can|box|bag|bottle|carton|package|pack|loaf|dozen|gallon|quart|pint|cup|tbsp|tsp|fl oz","location":"${location}","expiration_date":"","confidence":"high|medium|low"}]}. Use Meat, Beef, Chicken, Pork, Fish/Seafood, or Deli Meat for meat items. Use practical grocery units like lbs, jar, can, box, bag, bottle, carton, package, pack, gallon, dozen, or item. Do not invent expiration dates.`;
+  const categoryList="Meat|Beef|Chicken|Pork|Fish/Seafood|Deli Meat|Dairy|Eggs|Produce|Bakery|Dry Goods|Canned Goods|Condiments|Snacks|Frozen|Beverages|Household|Other";
+  const unitList="item|each|count|lb|lbs|oz|g|kg|jar|can|box|bag|bottle|carton|package|pack|loaf|dozen|gallon|quart|pint|cup|tbsp|tsp|fl oz";
+  const modeInstruction=scanMode==="meat_label"
+   ? "This is a close-up store meat label scan. Focus on product name, meat type, net weight, sell-by/use-by/best-by date, and package count if visible. For chicken breast labels, use category Chicken. For ground beef or steaks use Beef. For pork use Pork. Return the net weight as quantity and use lbs when the label says lb/lbs. If the date says sell by or use by, put that date in expiration_date in YYYY-MM-DD format when readable. If any number is blurry, use confidence low instead of guessing. Usually this should return one item."
+   : "This is a general pantry/fridge/freezer scan. Identify visible grocery items. If package weight or best-by date is clearly readable, include it. Do not guess hidden label details.";
+  const prompt=`${modeInstruction} Return only JSON with this shape: {"items":[{"name":"","category":"${categoryList}","quantity":"1","unit":"${unitList}","location":"${location}","expiration_date":"","confidence":"high|medium|low"}]}. Use practical grocery units like lbs, jar, can, box, bag, bottle, carton, package, pack, gallon, dozen, or item. Do not invent expiration dates.`;
 
   const response=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",
