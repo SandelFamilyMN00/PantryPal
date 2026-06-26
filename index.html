@@ -32,6 +32,12 @@
         </select>
       </div>
 
+      <select id="scanMode">
+        <option value="general">General food scan</option>
+        <option value="meat_label">Meat / store label scan</option>
+      </select>
+      <p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p>
+
       <div class="photo-actions two-col">
         <button id="takePhotoBtn" type="button">Take Photo</button>
         <button id="uploadPhotoBtn" type="button" class="secondary">Upload Photo</button>
@@ -116,8 +122,8 @@
     </section>
 
     <footer>
-      <strong>PantryPal v0.4.1</strong><br>
-      Meat categories · Unit selector · Recipe ideas · AI scanning
+      <strong>PantryPal v0.4.2</strong><br>
+      Meat label scan · Unit selector · Recipe ideas · AI scanning
     </footer>
   </main>
   <script src="config.js"></script>
