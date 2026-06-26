@@ -5,7 +5,7 @@ exports.handler=async function(event){
   const {imageBase64,mimeType="image/jpeg",location="Pantry"}=JSON.parse(event.body||"{}");
   if(!imageBase64)return json(400,{error:"Missing imageBase64"});
 
-  const prompt=`Identify visible grocery, pantry, fridge, or freezer items in this image. Return only JSON with this shape: {"items":[{"name":"","category":"Produce|Dairy|Bakery|Protein|Dry Goods|Frozen|Other","quantity":"1","unit":"item","location":"${location}","expiration_date":"","confidence":"high|medium|low"}]}. Do not invent expiration dates.`;
+  const prompt=`Identify visible grocery, pantry, fridge, or freezer items in this image. Return only JSON with this shape: {"items":[{"name":"","category":"Meat|Beef|Chicken|Pork|Fish/Seafood|Deli Meat|Dairy|Eggs|Produce|Bakery|Dry Goods|Canned Goods|Condiments|Snacks|Frozen|Beverages|Household|Other","quantity":"1","unit":"item|each|count|lb|lbs|oz|g|kg|jar|can|box|bag|bottle|carton|package|pack|loaf|dozen|gallon|quart|pint|cup|tbsp|tsp|fl oz","location":"${location}","expiration_date":"","confidence":"high|medium|low"}]}. Use Meat, Beef, Chicken, Pork, Fish/Seafood, or Deli Meat for meat items. Use practical grocery units like lbs, jar, can, box, bag, bottle, carton, package, pack, gallon, dozen, or item. Do not invent expiration dates.`;
 
   const response=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",
