@@ -11,112 +11,159 @@
   <main>
     <header class="hero compact-card">
       <div>
-        <p class="eyebrow">Kitchen Inventory</p>
+        <p class="eyebrow">Kitchen Assistant</p>
         <h1>PantryPal</h1>
-        <p class="muted">Scan food, track what you have, and turn it into meals.</p>
+        <p class="muted">Mild, family-friendly meals from what you already have.</p>
       </div>
       <p id="status" class="status-pill">Connecting...</p>
     </header>
 
-    <section class="compact-card scan">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Scanner</p>
-          <h2>Scan Food</h2>
+    <nav class="tabbar" aria-label="PantryPal sections">
+      <button class="tab-button active" data-tab="recipes" type="button">Recipes</button>
+      <button class="tab-button" data-tab="inventory" type="button">Inventory</button>
+      <button class="tab-button" data-tab="addscan" type="button">Add / Scan</button>
+      <button class="tab-button" data-tab="grocery" type="button">Grocery</button>
+    </nav>
+
+    <section class="tab-panel active" data-panel="recipes">
+      <section class="compact-card recipe-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Meals</p>
+            <h2>Recipe Ideas</h2>
+            <p class="muted">Default is mild, kid-friendly, and not spicy.</p>
+          </div>
         </div>
-        <select id="scanLocation" class="small-select"></select>
-      </div>
 
-      <select id="scanMode">
-        <option value="general">General food scan</option>
-        <option value="meat_label">Meat / store label scan</option>
-      </select>
-      <p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p>
+        <div class="preference-box">
+          <h3>Recipe Preferences</h3>
+          <div class="grid">
+            <label>Spice level
+              <select id="spiceLevel">
+                <option value="mild">Mild / not spicy</option>
+                <option value="medium">Medium</option>
+                <option value="hot">Hot</option>
+              </select>
+            </label>
+            <label>Recipe style
+              <select id="recipeStyle">
+                <option value="mild family friendly quick dinners">Mild family-friendly quick dinners</option>
+                <option value="kid friendly meals">Kid-friendly meals</option>
+                <option value="high protein mild meals">High-protein mild meals</option>
+                <option value="cheap pantry meals">Cheap pantry meals</option>
+                <option value="healthy simple mild meals">Healthy simple mild meals</option>
+              </select>
+            </label>
+          </div>
+          <label>Disliked or avoided ingredients
+            <textarea id="dislikedIngredients" placeholder="spicy foods, hot sauce, jalapeños, cayenne-heavy recipes"></textarea>
+          </label>
+          <label>Favorite family meals
+            <textarea id="favoriteMeals" placeholder="mild tacos, spaghetti, burgers, chicken rice, breakfast burritos"></textarea>
+          </label>
+          <label>Dietary notes
+            <textarea id="dietaryNotes" placeholder="simple meals, kid-friendly, no spicy heat"></textarea>
+          </label>
+          <button id="savePreferencesBtn" type="button">Save Preferences</button>
+          <p id="preferenceStatus" class="status-text"></p>
+        </div>
 
-      <div class="photo-actions two-col">
-        <button id="takePhotoBtn" type="button">Take Photo</button>
-        <button id="uploadPhotoBtn" type="button" class="secondary">Upload Photo</button>
-      </div>
-
-      <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
-      <input id="uploadInput" type="file" accept="image/*" class="hidden">
-
-      <img id="preview" class="preview hidden" alt="Preview">
-      <button id="scanBtn">Scan Photo</button>
-      <p id="scanStatus" class="status-text"></p>
-      <div id="scanResults"></div>
-      <button id="saveScanBtn" class="hidden">Save Selected Items</button>
+        <div class="two-col">
+          <button id="starterRecipeBtn" type="button" class="secondary">Show Built-in Recipes</button>
+          <button id="recipeBtn" type="button">Get AI Recipe Ideas</button>
+        </div>
+        <p id="recipeStatus" class="status-text"></p>
+        <div id="recipeIdeas"></div>
+      </section>
     </section>
 
-    <section class="compact-card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Stock Entry</p>
-          <h2>Add Item</h2>
+    <section class="tab-panel" data-panel="inventory">
+      <section class="compact-card inventory-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Inventory</p>
+            <h2>Inventory Board</h2>
+          </div>
+          <span id="inventoryCount" class="status-pill">0 items</span>
         </div>
-      </div>
-      <form id="itemForm" class="tight-form">
-        <input id="name" placeholder="Item name, e.g. Milk" required>
-        <div class="grid">
-          <select id="category"></select>
-          <select id="location"></select>
-          <input id="quantity" type="number" step="0.25" value="1">
-          <select id="unit"></select>
-        </div>
-        <input id="bestBy" type="date">
-        <textarea id="notes" placeholder="Notes"></textarea>
-        <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
-        <button>Add to Pantry</button>
-      </form>
+        <input id="search" placeholder="Search name, place, category, notes, or unit">
+        <div id="inventory"></div>
+      </section>
     </section>
 
-    <section class="compact-card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Shopping</p>
-          <h2>Grocery List</h2>
+    <section class="tab-panel" data-panel="addscan">
+      <section class="compact-card scan">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Scanner</p>
+            <h2>Scan Food</h2>
+          </div>
+          <select id="scanLocation" class="small-select"></select>
         </div>
-      </div>
-      <div id="groceryList"></div>
-    </section>
 
-    <section class="compact-card recipe-card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Meals</p>
-          <h2>Recipe Ideas</h2>
-          <p class="muted">Uses your current inventory and tells you what you are missing.</p>
-        </div>
-      </div>
-      <div class="two-col">
-        <select id="recipeStyle">
-          <option value="family friendly quick dinners">Family-friendly quick dinners</option>
-          <option value="kid friendly meals">Kid-friendly meals</option>
-          <option value="high protein meals">High-protein meals</option>
-          <option value="cheap pantry meals">Cheap pantry meals</option>
-          <option value="healthy simple meals">Healthy simple meals</option>
+        <select id="scanMode">
+          <option value="general">General food scan</option>
+          <option value="meat_label">Meat / store label scan</option>
         </select>
-        <button id="recipeBtn" type="button">Get Recipe Ideas</button>
-      </div>
-      <p id="recipeStatus" class="status-text"></p>
-      <div id="recipeIdeas"></div>
+        <p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p>
+
+        <div class="photo-actions two-col">
+          <button id="takePhotoBtn" type="button">Take Photo</button>
+          <button id="uploadPhotoBtn" type="button" class="secondary">Upload Existing Photo</button>
+        </div>
+
+        <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+        <input id="uploadInput" type="file" accept="image/*" class="hidden">
+
+        <img id="preview" class="preview hidden" alt="Preview">
+        <button id="scanBtn">Scan Photo</button>
+        <p id="scanStatus" class="status-text"></p>
+        <div id="scanResults"></div>
+        <button id="saveScanBtn" class="hidden">Save Selected Items</button>
+      </section>
+
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Stock Entry</p>
+            <h2>Add Item</h2>
+          </div>
+        </div>
+        <form id="itemForm" class="tight-form">
+          <input id="name" placeholder="Item name, e.g. Milk" required>
+          <div class="grid">
+            <select id="category"></select>
+            <select id="location"></select>
+            <input id="quantity" type="number" step="0.25" value="1">
+            <select id="unit"></select>
+          </div>
+          <input id="bestBy" type="date">
+          <textarea id="notes" placeholder="Notes"></textarea>
+          <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
+          <button>Add to Pantry</button>
+        </form>
+      </section>
     </section>
 
-    <section class="compact-card inventory-card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Inventory</p>
-          <h2>Inventory Board</h2>
+    <section class="tab-panel" data-panel="grocery">
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Shopping</p>
+            <h2>Grocery List</h2>
+          </div>
         </div>
-        <span id="inventoryCount" class="status-pill">0 items</span>
-      </div>
-      <input id="search" placeholder="Search name, place, category, or unit">
-      <div id="inventory"></div>
+        <div class="manual-grocery">
+          <input id="manualGroceryName" placeholder="Add grocery item">
+          <button id="manualGroceryBtn" type="button">Add to List</button>
+        </div>
+        <div id="groceryList"></div>
+      </section>
     </section>
 
     <footer>
-      <strong>PantryPal v0.4.3</strong><br>
-      More storage areas · Meat label scan · Unit selector · Recipe ideas
+      <strong>PantryPal v0.5.0</strong><br>
+      Tabs · Mild recipe preferences · Partial-use tracking
     </footer>
   </main>
   <script src="config.js"></script>

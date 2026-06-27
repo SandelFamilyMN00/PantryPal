@@ -2,7 +2,7 @@ exports.handler=async function(event){
  if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
  if(!process.env.OPENAI_API_KEY)return json(500,{error:"Missing OPENAI_API_KEY in Netlify environment variables"});
  try{
-  const {inventory=[],style="family friendly quick dinners"}=JSON.parse(event.body||"{}");
+  const {inventory=[],style="mild family friendly quick dinners",preferences={}}=JSON.parse(event.body||"{}");
   if(!Array.isArray(inventory)||!inventory.length)return json(400,{error:"Missing inventory"});
   const compactInventory=inventory.slice(0,80).map(i=>({
    name:String(i.name||"").slice(0,80),
@@ -13,7 +13,29 @@ exports.handler=async function(event){
    best_by:i.best_by||null
   })).filter(i=>i.name);
 
-  const prompt=`You are helping a busy parent plan simple meals from pantry inventory. Suggest 4 practical recipe ideas using the provided inventory. Style: ${style}. Prefer using items on hand. It is okay to list a few missing staple ingredients. Keep steps short and realistic. Inventory JSON: ${JSON.stringify(compactInventory)}`;
+  const prefs={
+   spiceLevel:String(preferences.spiceLevel||"mild"),
+   dislikedIngredients:String(preferences.dislikedIngredients||"spicy foods, hot sauce, jalapenos, cayenne-heavy recipes"),
+   favoriteMeals:String(preferences.favoriteMeals||"mild tacos, spaghetti, burgers, chicken rice, breakfast burritos, quesadillas"),
+   dietaryNotes:String(preferences.dietaryNotes||"simple, kid-friendly, mild meals with no spicy heat")
+  };
+
+  const prompt=`You are helping a busy parent plan simple meals from pantry inventory.
+
+Recipe source rules:
+- Do not scrape or quote recipe websites.
+- Use only built-in cooking knowledge, the inventory below, and the family's saved preferences.
+- Keep recipes practical and original, not copied from a site.
+
+Family preferences:
+- Spice level: ${prefs.spiceLevel}
+- Avoid/disliked: ${prefs.dislikedIngredients}
+- Favorite meals: ${prefs.favoriteMeals}
+- Dietary notes: ${prefs.dietaryNotes}
+- If spice level is mild, avoid spicy foods, hot sauce, jalapenos, cayenne-heavy recipes, and high-heat chili seasoning.
+- Mild taco seasoning and mild chili are allowed only when clearly labeled mild.
+
+Suggest 4 practical recipe ideas using the provided inventory. Style: ${style}. Prefer using items on hand. It is okay to list a few missing staple ingredients. Keep steps short and realistic. Inventory JSON: ${JSON.stringify(compactInventory)}`;
 
   const response=await fetch("https://api.openai.com/v1/responses",{
    method:"POST",
