@@ -1,119 +1,72 @@
 const cfg=window.PANTRYPAL_CONFIG;
 const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
 let items=[],scanItems=[],selectedPhotoFile=null,editingId=null;
+let groceryItems=JSON.parse(localStorage.getItem('pantrypal_grocery_items')||'[]');
 const $=id=>document.getElementById(id);
-const categories=["Meat","Beef","Chicken","Pork","Fish/Seafood","Deli Meat","Dairy","Eggs","Produce","Bakery","Dry Goods","Canned Goods","Condiments","Snacks","Frozen","Beverages","Household","Other"];
-const units=["item","each","count","lb","lbs","oz","g","kg","jar","can","box","bag","bottle","carton","package","pack","loaf","dozen","gallon","quart","pint","cup","tbsp","tsp","fl oz"];
-const locations=["Pantry","Kitchen Cupboard 1","Kitchen Cupboard 2","Kitchen Cupboard 3","Fridge","Freezer","Garage Freezer","Basement Fridge","Small Fridge","Small Freezer"];
+const categories=['Meat','Beef','Chicken','Pork','Fish/Seafood','Deli Meat','Dairy','Eggs','Produce','Bakery','Dry Goods','Canned Goods','Condiments','Snacks','Frozen','Beverages','Household','Other'];
+const units=['item','each','count','lb','lbs','oz','g','kg','jar','can','box','bag','bottle','carton','package','pack','loaf','dozen','gallon','quart','pint','cup','tbsp','tsp','fl oz'];
+const locations=['Pantry','Kitchen Cupboard 1','Kitchen Cupboard 2','Kitchen Cupboard 3','Fridge','Freezer','Garage Freezer','Basement Fridge','Small Fridge','Small Freezer'];
+const defaultPreferences={spiceLevel:'mild',dislikedIngredients:'spicy foods, hot sauce, jalapenos, cayenne-heavy recipes',favoriteMeals:'mild tacos, spaghetti, burgers, chicken rice, breakfast burritos, quesadillas',dietaryNotes:'simple, kid-friendly, mild meals with no spicy heat'};
+const starterRecipes=[
+ {name:'Mild Beef Tacos',time:'25 min',ingredients:['ground beef','tortillas','cheese','lettuce','tomato','mild taco seasoning'],uses:[['ground beef',1,'lbs'],['tortillas',6,'each']],steps:['Brown beef and drain.','Season with mild taco seasoning.','Serve with tortillas, cheese, and mild toppings.']},
+ {name:'Simple Spaghetti',time:'30 min',ingredients:['pasta','spaghetti sauce','ground beef','parmesan'],uses:[['pasta',1,'box'],['ground beef',1,'lbs']],steps:['Boil pasta.','Warm sauce and cooked beef.','Combine and serve with cheese.']},
+ {name:'Mild Chili',time:'45 min',ingredients:['ground beef','beans','tomato sauce','mild chili seasoning','cheese'],uses:[['ground beef',1,'lbs'],['beans',1,'can']],steps:['Brown beef.','Add beans, tomato sauce, and mild seasoning.','Simmer and serve with cheese.']},
+ {name:'Breakfast Burritos',time:'20 min',ingredients:['eggs','tortillas','cheese','breakfast sausage'],uses:[['eggs',6,'each'],['tortillas',6,'each']],steps:['Scramble eggs.','Add cheese and cooked meat if available.','Wrap in tortillas.']},
+ {name:'Chicken Fried Rice',time:'25 min',ingredients:['chicken','rice','eggs','mixed vegetables','soy sauce'],uses:[['chicken',1,'lbs'],['rice',2,'cup']],steps:['Cook chicken.','Stir fry rice, egg, and vegetables.','Add mild seasoning or soy sauce.']},
+ {name:'Cheese Quesadillas',time:'15 min',ingredients:['tortillas','cheese','chicken'],uses:[['tortillas',4,'each'],['cheese',1,'cup']],steps:['Add cheese to tortillas.','Add chicken if available.','Toast until melted.']}
+];
 init();
 function init(){
- fillSelect("category",categories,"Dry Goods");
- fillSelect("unit",units,"item");
- fillSelect("location",locations,"Pantry");
- fillSelect("scanLocation",locations,"Pantry");
- $("itemForm").addEventListener("submit",addManual);
- $("scanMode").addEventListener("change",updateScanHint);
- $("takePhotoBtn").addEventListener("click",()=>$("cameraInput").click());
- $("uploadPhotoBtn").addEventListener("click",()=>$("uploadInput").click());
- $("cameraInput").addEventListener("change",previewPhoto);
- $("uploadInput").addEventListener("change",previewPhoto);
- $("scanBtn").addEventListener("click",scanPhoto);
- $("saveScanBtn").addEventListener("click",saveScan);
- $("search").addEventListener("input",render);
- $("recipeBtn").addEventListener("click",getRecipeIdeas);
- updateScanHint();
- load();
+ fillSelect('category',categories,'Dry Goods');fillSelect('unit',units,'item');fillSelect('location',locations,'Pantry');fillSelect('scanLocation',locations,'Pantry');
+ wireTabs();loadPreferences();
+ $('itemForm').addEventListener('submit',addManual);
+ $('scanMode').addEventListener('change',updateScanHint);
+ $('takePhotoBtn').addEventListener('click',()=>$('cameraInput').click());$('uploadPhotoBtn').addEventListener('click',()=>$('uploadInput').click());
+ $('cameraInput').addEventListener('change',previewPhoto);$('uploadInput').addEventListener('change',previewPhoto);
+ $('scanBtn').addEventListener('click',scanPhoto);$('saveScanBtn').addEventListener('click',saveScan);
+ $('search').addEventListener('input',render);$('recipeBtn').addEventListener('click',getRecipeIdeas);$('starterRecipeBtn').addEventListener('click',renderStarterRecipes);
+ $('savePreferencesBtn').addEventListener('click',savePreferences);$('manualGroceryBtn').addEventListener('click',addManualGrocery);
+ updateScanHint();load();showTab('recipes');
 }
-function updateScanHint(){
- const mode=$("scanMode").value;
- $("scanHint").textContent=mode==="meat_label"?"Meat label mode: take one close, straight-on photo of the store label so weight, price label, and sell/use-by date are readable.":"General mode: scan pantry, fridge, freezer, or package fronts. For dates and weights, get the label clearly in frame.";
-}
+function wireTabs(){document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)))}
+function showTab(tab){document.querySelectorAll('.tab-button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===tab))}
+function getPreferences(){return JSON.parse(localStorage.getItem('pantrypal_preferences')||JSON.stringify(defaultPreferences))}
+function loadPreferences(){const p=getPreferences();$('spiceLevel').value=p.spiceLevel||'mild';$('dislikedIngredients').value=p.dislikedIngredients||defaultPreferences.dislikedIngredients;$('favoriteMeals').value=p.favoriteMeals||defaultPreferences.favoriteMeals;$('dietaryNotes').value=p.dietaryNotes||defaultPreferences.dietaryNotes}
+function savePreferences(){const p={spiceLevel:$('spiceLevel').value,dislikedIngredients:$('dislikedIngredients').value,favoriteMeals:$('favoriteMeals').value,dietaryNotes:$('dietaryNotes').value};localStorage.setItem('pantrypal_preferences',JSON.stringify(p));$('preferenceStatus').textContent='Preferences saved.';renderStarterRecipes()}
+function updateScanHint(){const mode=$('scanMode').value;$('scanHint').textContent=mode==='meat_label'?'Meat label mode: take one close photo of the store label.':'General mode: scan pantry, fridge, freezer, or package fronts.'}
 async function load(){
- $("status").textContent="Loading...";
- const {data,error}=await db.from("pantry_items").select("*").order("created_at",{ascending:false});
- if(error){$("status").textContent="Database error: "+error.message;return}
- items=data||[];$("status").textContent=`Connected · ${items.length} item(s)`;$("inventoryCount").textContent=`${items.length} item${items.length===1?"":"s"}`;render();
+ $('status').textContent='Loading...';const {data,error}=await db.from('pantry_items').select('*').order('created_at',{ascending:false});
+ if(error){$('status').textContent='Database error: '+error.message;return}
+ items=data||[];$('status').textContent='Connected · '+items.length+' item(s)';$('inventoryCount').textContent=items.length+' item'+(items.length===1?'':'s');render();renderStarterRecipes();
 }
-function readForm(){return{name:$("name").value.trim(),category:$("category").value,location:$("location").value,quantity:+$("quantity").value||1,unit:$("unit").value||"item",best_by:$("bestBy").value||null,notes:$("notes").value||"",low_stock:$("lowStock").checked}}
-async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$("quantity").value=1;$("unit").value="item";$("category").value="Dry Goods";$("location").value="Pantry";await load()}
-async function insert(rows){const {error}=await db.from("pantry_items").insert(rows);if(error){alert(error.message);throw error}}
+function readForm(){return{name:$('name').value.trim(),category:$('category').value,location:$('location').value,quantity:+$('quantity').value||1,unit:$('unit').value||'item',best_by:$('bestBy').value||null,notes:$('notes').value||'',low_stock:$('lowStock').checked}}
+async function addManual(e){e.preventDefault();await insert([readForm()]);e.target.reset();$('quantity').value=1;$('unit').value='item';$('category').value='Dry Goods';$('location').value='Pantry';await load()}
+async function insert(rows){const {error}=await db.from('pantry_items').insert(rows);if(error){alert(error.message);throw error}}
 function render(){renderInventory();renderGroceryList()}
-function renderInventory(){
- const q=$("search").value.toLowerCase();
- const list=items.filter(i=>!q||(i.name||"").toLowerCase().includes(q)||(i.location||"").toLowerCase().includes(q)||(i.category||"").toLowerCase().includes(q)||(i.unit||"").toLowerCase().includes(q));
- $("inventory").innerHTML=list.length?list.map(i=>editingId===i.id?editCard(i):itemCard(i)).join(""):"<p>No matching items.</p>";
-}
-function itemCard(i){return `<div class="item"><div class="item-head"><div><h3>${esc(i.name)}</h3><p>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)} · ${esc(i.category)}</p></div>${i.low_stock?'<span class="pill">Low stock</span>':""}</div>${i.best_by?`<p class="meta">Best by: ${esc(i.best_by)}</p>`:""}${i.notes?`<p class="notes">${esc(i.notes)}</p>`:""}<div class="button-row"><button onclick="startEdit('${i.id}')">Edit</button><button class="secondary" onclick="toggleLow('${i.id}',${!i.low_stock})">${i.low_stock?"Remove from List":"Add to List"}</button><button class="danger" onclick="del('${i.id}')">Delete</button></div></div>`}
-function editCard(i){return `<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-${i.id}" value="${esc(i.name)}" placeholder="Item name"><div class="grid"><select id="edit-category-${i.id}">${options(categories,i.category)}</select><select id="edit-location-${i.id}">${options(locations,i.location)}</select><input id="edit-quantity-${i.id}" type="number" step="0.25" value="${esc(i.quantity)}"><select id="edit-unit-${i.id}">${options(units,i.unit)}</select></div><input id="edit-best-${i.id}" type="date" value="${esc(i.best_by||"")}"><textarea id="edit-notes-${i.id}" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input id="edit-low-${i.id}" type="checkbox" ${i.low_stock?"checked":""}> Low stock / add to grocery list</label><div class="button-row two-actions"><button onclick="saveEdit('${i.id}')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>`}
-function renderGroceryList(){
- const low=items.filter(i=>i.low_stock);
- $("groceryList").innerHTML=low.length?low.map(i=>`<div class="grocery-item"><strong>${esc(i.name)}</strong><span>${esc(i.quantity)} ${esc(i.unit)} · ${esc(i.location)}</span><button class="secondary small" onclick="toggleLow('${i.id}',false)">Got it</button></div>`).join(""):"<p class='muted'>No low-stock items yet. Tap “Add to List” on an inventory item.</p>";
-}
-function startEdit(id){editingId=id;renderInventory()}
-function cancelEdit(){editingId=null;renderInventory()}
-async function saveEdit(id){
- const row={name:$(`edit-name-${id}`).value.trim(),category:$(`edit-category-${id}`).value,location:$(`edit-location-${id}`).value,quantity:+$(`edit-quantity-${id}`).value||1,unit:$(`edit-unit-${id}`).value||"item",best_by:$(`edit-best-${id}`).value||null,notes:$(`edit-notes-${id}`).value||"",low_stock:$(`edit-low-${id}`).checked};
- const {error}=await db.from("pantry_items").update(row).eq("id",id);
- if(error){alert(error.message);return}
- editingId=null;await load();
-}
-async function toggleLow(id,val){const {error}=await db.from("pantry_items").update({low_stock:val}).eq("id",id);if(error){alert(error.message);return}await load()}
-async function del(id){if(!confirm("Delete this item from PantryPal?"))return;await db.from("pantry_items").delete().eq("id",id);await load()}
-function previewPhoto(e){
- const f=e.target.files[0];
- if(!f)return;
- selectedPhotoFile=f;scanItems=[];$("scanResults").innerHTML="";$("saveScanBtn").classList.add("hidden");
- $("preview").src=URL.createObjectURL(f);$("preview").classList.remove("hidden");$("scanStatus").textContent=`Photo selected: ${f.name||"camera photo"}`;
-}
-async function scanPhoto(){
- const f=selectedPhotoFile;
- if(!f){$("scanStatus").textContent="Choose or take a photo first.";return}
- const scanMode=$("scanMode").value;
- $("scanStatus").textContent=scanMode==="meat_label"?"Preparing label photo...":"Preparing photo...";
- try{
-  const imageBase64=await imageToJpegBase64(f,scanMode==="meat_label"?1600:1280,0.82);
-  $("scanStatus").textContent=scanMode==="meat_label"?"Reading meat label...":"Scanning...";
-  const r=await fetch("/scan-pantry",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageBase64,mimeType:"image/jpeg",location:$("scanLocation").value,scanMode})});
-  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||`Server returned ${r.status}`)}
-  if(!r.ok)throw new Error(data.error||`Scan failed with status ${r.status}`);
-  scanItems=(data.items||[]).map(x=>({name:x.name||"",category:normalizeCategory(x.category),location:x.location||$("scanLocation").value,quantity:Number(x.quantity)||1,unit:normalizeUnit(x.unit),best_by:x.expiration_date||x.best_by||null,notes:scanNotes(x,scanMode),low_stock:false}));
-  renderScan();$("scanStatus").textContent=`Found ${scanItems.length} item(s). Review before saving.`;
- }catch(e){$("scanStatus").textContent="Scan error: "+e.message}
-}
-function scanNotes(x,mode){
- const notes=[];
- if(x.confidence)notes.push(`AI confidence: ${x.confidence}`);
- if(mode==="meat_label")notes.push("Label scan: verify weight and date before freezing or cooking.");
- return notes.join(" · ");
-}
-function renderScan(){
- $("scanResults").innerHTML=scanItems.map((i,n)=>`<div class="scan-card" data-i="${n}"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="${esc(i.name)}" placeholder="Name"><div class="grid"><select class="c">${options(categories,i.category)}</select><select class="l">${options(locations,i.location)}</select><input class="q" type="number" step="0.01" value="${esc(i.quantity)}"><select class="u">${options(units,i.unit)}</select></div><input class="b" type="date" value="${esc(i.best_by||"")}"><textarea class="notes-input" placeholder="Notes">${esc(i.notes||"")}</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock / add to grocery list</label></div>`).join("");
- $("saveScanBtn").classList.remove("hidden");
-}
-async function saveScan(){
- const rows=[...document.querySelectorAll(".scan-card")].filter(c=>c.querySelector(".save").checked).map(c=>({name:c.querySelector(".n").value.trim(),category:c.querySelector(".c").value,quantity:+c.querySelector(".q").value||1,unit:c.querySelector(".u").value||"item",location:c.querySelector(".l").value,best_by:c.querySelector(".b").value||null,notes:c.querySelector(".notes-input").value||"",low_stock:c.querySelector(".low").checked})).filter(r=>r.name);
- if(!rows.length){$("scanStatus").textContent="No checked items to save.";return}
- await insert(rows);$("scanResults").innerHTML="";$("saveScanBtn").classList.add("hidden");$("scanStatus").textContent=`Saved ${rows.length} item(s).`;await load();
-}
-async function getRecipeIdeas(){
- if(!items.length){$("recipeStatus").textContent="Add or scan some inventory first.";return}
- $("recipeStatus").textContent="Building ideas from your inventory...";
- $("recipeIdeas").innerHTML="";
- try{
-  const inventory=items.slice(0,80).map(i=>({name:i.name,category:i.category,location:i.location,quantity:i.quantity,unit:i.unit,best_by:i.best_by,notes:i.notes}));
-  const r=await fetch("/recipe-ideas",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({inventory,style:$("recipeStyle").value})});
-  const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||`Server returned ${r.status}`)}
-  if(!r.ok)throw new Error(data.error||`Recipe request failed with status ${r.status}`);
-  renderRecipes(data.recipes||[]);
-  $("recipeStatus").textContent=`Found ${(data.recipes||[]).length} idea(s).`;
- }catch(e){$("recipeStatus").textContent="Recipe error: "+e.message}
-}
-function renderRecipes(recipes){
- $("recipeIdeas").innerHTML=recipes.length?recipes.map(r=>`<div class="recipe"><div class="item-head"><h3>${esc(r.name)}</h3><span class="pill">${esc(r.time||"Quick")}</span></div><p>${esc(r.why||"")}</p><p><strong>Use:</strong> ${(r.use||[]).map(esc).join(", ")}</p>${(r.missing||[]).length?`<p><strong>Missing:</strong> ${r.missing.map(esc).join(", ")}</p>`:`<p><strong>Missing:</strong> Nothing obvious</p>`}<ol>${(r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div>`).join(""):"<p class='muted'>No recipe ideas came back. Add a few more useful ingredients and try again.</p>";
-}
-function imageToJpegBase64(file,maxSize=1280,quality=0.78){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{try{let {width,height}=img;const scale=Math.min(1,maxSize/Math.max(width,height));width=Math.round(width*scale);height=Math.round(height*scale);const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,width,height);URL.revokeObjectURL(url);resolve(canvas.toDataURL("image/jpeg",quality).split(",")[1])}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Could not read image"))};img.src=url})}
-function normalizeCategory(v){const s=String(v||"").toLowerCase();if(s.includes("beef"))return"Beef";if(s.includes("chicken")||s.includes("poultry"))return"Chicken";if(s.includes("pork")||s.includes("bacon")||s.includes("ham"))return"Pork";if(s.includes("fish")||s.includes("seafood")||s.includes("shrimp")||s.includes("tuna"))return"Fish/Seafood";if(s.includes("deli"))return"Deli Meat";if(s.includes("meat")||s.includes("protein"))return"Meat";if(s.includes("egg"))return"Eggs";if(s.includes("dairy"))return"Dairy";if(s.includes("produce")||s.includes("fruit")||s.includes("vegetable"))return"Produce";if(s.includes("can"))return"Canned Goods";if(s.includes("condiment")||s.includes("sauce"))return"Condiments";if(s.includes("snack"))return"Snacks";if(s.includes("frozen"))return"Frozen";return categories.find(c=>c.toLowerCase()===s)||"Other"}
-function normalizeUnit(v){const s=String(v||"item").toLowerCase().trim();if(["pound","pounds","lb","lbs"].includes(s))return"lbs";if(["ounce","ounces","oz"].includes(s))return"oz";if(["each","count","ct"].includes(s))return"each";return units.find(u=>u.toLowerCase()===s)||"item"}
-function fillSelect(id,arr,current){$(id).innerHTML=options(arr,current)}
-function options(arr,current){return arr.map(v=>`<option ${String(v).toLowerCase()===String(current||"").toLowerCase()?"selected":""}>${esc(v)}</option>`).join("")}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function renderInventory(){const q=$('search').value.toLowerCase();const list=items.filter(i=>!q||(i.name||'').toLowerCase().includes(q)||(i.location||'').toLowerCase().includes(q)||(i.category||'').toLowerCase().includes(q)||(i.unit||'').toLowerCase().includes(q)||(i.notes||'').toLowerCase().includes(q));$('inventory').innerHTML=list.length?list.map(i=>editingId===i.id?editCard(i):itemCard(i)).join(''):'<p>No matching items.</p>'}
+function itemCard(i){return '<div class="item"><div class="item-head"><div><h3>'+esc(i.name)+'</h3><p>'+esc(i.quantity)+' '+esc(i.unit)+' · '+esc(i.location)+' · '+esc(i.category)+'</p></div>'+(i.low_stock?'<span class="pill">Low stock</span>':'')+'</div>'+(i.best_by?'<p class="meta">Best by: '+esc(i.best_by)+'</p>':'')+(i.notes?'<p class="notes">'+esc(i.notes)+'</p>':'')+'<div class="button-row"><button onclick="useAmountPrompt(\''+i.id+'\')">Use Amount</button><button class="secondary" onclick="useAll(\''+i.id+'\')">Use All</button><button onclick="startEdit(\''+i.id+'\')">Edit</button><button class="secondary" onclick="toggleLow(\''+i.id+'\','+(!i.low_stock)+')">'+(i.low_stock?'Remove from List':'Add to List')+'</button><button class="danger" onclick="del(\''+i.id+'\')">Delete</button></div></div>'}
+function editCard(i){return '<div class="item edit-card"><h3>Edit Item</h3><input id="edit-name-'+i.id+'" value="'+esc(i.name)+'"><div class="grid"><select id="edit-category-'+i.id+'">'+options(categories,i.category)+'</select><select id="edit-location-'+i.id+'">'+options(locations,i.location)+'</select><input id="edit-quantity-'+i.id+'" type="number" step="0.25" value="'+esc(i.quantity)+'"><select id="edit-unit-'+i.id+'">'+options(units,i.unit)+'</select></div><input id="edit-best-'+i.id+'" type="date" value="'+esc(i.best_by||'')+'"><textarea id="edit-notes-'+i.id+'">'+esc(i.notes||'')+'</textarea><label class="checkrow"><input id="edit-low-'+i.id+'" type="checkbox" '+(i.low_stock?'checked':'')+'> Low stock / add to grocery list</label><div class="button-row two-actions"><button onclick="saveEdit(\''+i.id+'\')">Save Changes</button><button class="secondary" onclick="cancelEdit()">Cancel</button></div></div>'}
+function renderGroceryList(){const low=items.filter(i=>i.low_stock).map(i=>({name:i.name,detail:i.quantity+' '+i.unit+' · '+i.location,source:'inventory',id:i.id}));const all=[...low,...groceryItems];$('groceryList').innerHTML=all.length?all.map((i,idx)=>'<div class="grocery-item"><strong>'+esc(i.name)+'</strong><span>'+esc(i.detail||'')+'</span><button class="secondary small" onclick="'+(i.source==='inventory'?'toggleLow(\''+i.id+'\',false)':'clearManualGrocery('+(idx-low.length)+')')+'">'+(i.source==='inventory'?'Got it':'Remove')+'</button></div>').join(''):"<p class='muted'>No grocery items yet.</p>"}
+function startEdit(id){editingId=id;renderInventory()}function cancelEdit(){editingId=null;renderInventory()}
+async function saveEdit(id){const row={name:$('edit-name-'+id).value.trim(),category:$('edit-category-'+id).value,location:$('edit-location-'+id).value,quantity:+$('edit-quantity-'+id).value||1,unit:$('edit-unit-'+id).value||'item',best_by:$('edit-best-'+id).value||null,notes:$('edit-notes-'+id).value||'',low_stock:$('edit-low-'+id).checked};const {error}=await db.from('pantry_items').update(row).eq('id',id);if(error){alert(error.message);return}editingId=null;await load()}
+async function useAmountPrompt(id){const item=items.find(i=>i.id===id);if(!item)return;const current=Number(item.quantity);if(!Number.isFinite(current)){startEdit(id);return}const raw=prompt('How much '+item.unit+' did you use?','1');if(raw===null)return;const used=Number(raw);if(!Number.isFinite(used)||used<=0){alert('Enter a number greater than 0.');return}await subtractItem(item,used)}
+async function useAll(id){const item=items.find(i=>i.id===id);if(item&&confirm('Use all of '+item.name+'?'))await del(id,true)}
+async function subtractItem(item,used){const remaining=Number(item.quantity)-used;if(remaining<=0){await del(item.id,true);return}const {error}=await db.from('pantry_items').update({quantity:remaining}).eq('id',item.id);if(error){alert(error.message);return}await load()}
+async function toggleLow(id,val){const {error}=await db.from('pantry_items').update({low_stock:val}).eq('id',id);if(error){alert(error.message);return}await load()}
+async function del(id,skip=false){if(!skip&&!confirm('Delete this item from PantryPal?'))return;await db.from('pantry_items').delete().eq('id',id);await load()}
+function addManualGrocery(){const name=$('manualGroceryName').value.trim();if(!name)return;groceryItems.push({name,detail:'Manual item'});localStorage.setItem('pantrypal_grocery_items',JSON.stringify(groceryItems));$('manualGroceryName').value='';renderGroceryList()}
+function clearManualGrocery(idx){groceryItems.splice(idx,1);localStorage.setItem('pantrypal_grocery_items',JSON.stringify(groceryItems));renderGroceryList()}
+function addMissingToGrocery(names){names.forEach(name=>{if(name&&!groceryItems.some(i=>i.name.toLowerCase()===String(name).toLowerCase()))groceryItems.push({name,detail:'Missing recipe ingredient'})});localStorage.setItem('pantrypal_grocery_items',JSON.stringify(groceryItems));renderGroceryList();showTab('grocery')}
+async function markCooked(idx){const recipe=starterRecipes[idx];if(!recipe)return;for(const u of recipe.uses){const item=findInventoryMatch(u[0]);if(item)await subtractItem(item,Number(u[1])||1)}await load()}
+function findInventoryMatch(name){const key=String(name).toLowerCase();return items.find(i=>String(i.name).toLowerCase().includes(key)||key.includes(String(i.name).toLowerCase()))}
+function previewPhoto(e){const f=e.target.files[0];if(!f)return;selectedPhotoFile=f;scanItems=[];$('scanResults').innerHTML='';$('saveScanBtn').classList.add('hidden');$('preview').src=URL.createObjectURL(f);$('preview').classList.remove('hidden');$('scanStatus').textContent='Photo selected: '+(f.name||'camera photo')}
+async function scanPhoto(){const f=selectedPhotoFile;if(!f){$('scanStatus').textContent='Choose or take a photo first.';return}try{const imageBase64=await imageToJpegBase64(f,1280,0.82);const r=await fetch('/scan-pantry',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageBase64,mimeType:'image/jpeg',location:$('scanLocation').value,scanMode:$('scanMode').value})});const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||'Server error')}if(!r.ok)throw new Error(data.error||'Scan failed');scanItems=(data.items||[]).map(x=>({name:x.name||'',category:normalizeCategory(x.category),location:x.location||$('scanLocation').value,quantity:Number(x.quantity)||1,unit:normalizeUnit(x.unit),best_by:x.expiration_date||x.best_by||null,notes:x.confidence?'AI confidence: '+x.confidence:'',low_stock:false}));renderScan();$('scanStatus').textContent='Found '+scanItems.length+' item(s).'}catch(e){$('scanStatus').textContent='Scan error: '+e.message}}
+function renderScan(){$('scanResults').innerHTML=scanItems.map((i,n)=>'<div class="scan-card" data-i="'+n+'"><label class="checkrow"><input class="save" type="checkbox" checked> Save</label><input class="n" value="'+esc(i.name)+'"><div class="grid"><select class="c">'+options(categories,i.category)+'</select><select class="l">'+options(locations,i.location)+'</select><input class="q" type="number" step="0.01" value="'+esc(i.quantity)+'"><select class="u">'+options(units,i.unit)+'</select></div><input class="b" type="date" value="'+esc(i.best_by||'')+'"><textarea class="notes-input">'+esc(i.notes||'')+'</textarea><label class="checkrow"><input class="low" type="checkbox"> Low stock</label></div>').join('');$('saveScanBtn').classList.remove('hidden')}
+async function saveScan(){const rows=[...document.querySelectorAll('.scan-card')].filter(c=>c.querySelector('.save').checked).map(c=>({name:c.querySelector('.n').value.trim(),category:c.querySelector('.c').value,quantity:+c.querySelector('.q').value||1,unit:c.querySelector('.u').value||'item',location:c.querySelector('.l').value,best_by:c.querySelector('.b').value||null,notes:c.querySelector('.notes-input').value||'',low_stock:c.querySelector('.low').checked})).filter(r=>r.name);if(!rows.length){$('scanStatus').textContent='No checked items to save.';return}await insert(rows);$('scanResults').innerHTML='';$('saveScanBtn').classList.add('hidden');await load()}
+async function getRecipeIdeas(){if(!items.length){$('recipeStatus').textContent='Add or scan some inventory first.';return}$('recipeStatus').textContent='Building mild ideas...';try{const inventory=items.slice(0,80).map(i=>({name:i.name,category:i.category,location:i.location,quantity:i.quantity,unit:i.unit,best_by:i.best_by,notes:i.notes}));const r=await fetch('/recipe-ideas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({inventory,style:$('recipeStyle').value,preferences:getPreferences()})});const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw new Error(raw.slice(0,160)||'Server error')}if(!r.ok)throw new Error(data.error||'Recipe failed');renderAiRecipes(data.recipes||[]);$('recipeStatus').textContent='Found '+(data.recipes||[]).length+' mild idea(s).'}catch(e){$('recipeStatus').textContent='Recipe error: '+e.message}}
+function renderStarterRecipes(){const recipes=starterRecipes.map(r=>{const have=[],missing=[];r.ingredients.forEach(x=>findInventoryMatch(x)?have.push(x):missing.push(x));return {...r,have,missing}});$('recipeIdeas').innerHTML=recipes.map((r,idx)=>'<div class="recipe"><div class="item-head"><h3>'+esc(r.name)+'</h3><span class="pill">'+esc(r.time)+'</span></div><p><strong>Have:</strong> '+(r.have.length?r.have.map(esc).join(', '):'None found yet')+'</p><p><strong>Missing:</strong> '+(r.missing.length?r.missing.map(esc).join(', '):'Nothing obvious')+'</p><ol>'+r.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol><div class="button-row two-actions"><button onclick="addMissingToGrocery(starterRecipes['+idx+'].ingredients.filter(x=>!findInventoryMatch(x)))">Add Missing</button><button class="secondary" onclick="markCooked('+idx+')">Cook This</button></div></div>').join('');$('recipeStatus').textContent='Built-in recipes are mild starter templates. No recipe websites are scraped.'}
+function renderAiRecipes(recipes){$('recipeIdeas').innerHTML=recipes.length?recipes.map(r=>'<div class="recipe"><div class="item-head"><h3>'+esc(r.name)+'</h3><span class="pill">'+esc(r.time||'Quick')+'</span></div><p>'+esc(r.why||'')+'</p><p><strong>Use:</strong> '+(r.use||[]).map(esc).join(', ')+'</p><p><strong>Missing:</strong> '+((r.missing||[]).length?r.missing.map(esc).join(', '):'Nothing obvious')+'</p><ol>'+(r.steps||[]).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>').join(''):'<p>No recipe ideas came back.</p>'}
+function imageToJpegBase64(file,maxSize=1280,quality=0.78){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{try{let w=img.width,h=img.height;const scale=Math.min(1,maxSize/Math.max(w,h));w=Math.round(w*scale);h=Math.round(h*scale);const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(canvas.toDataURL('image/jpeg',quality).split(',')[1])}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read image'))};img.src=url})}
+function normalizeCategory(v){const s=String(v||'').toLowerCase();if(s.includes('beef'))return'Beef';if(s.includes('chicken'))return'Chicken';if(s.includes('pork'))return'Pork';if(s.includes('fish')||s.includes('seafood'))return'Fish/Seafood';if(s.includes('meat'))return'Meat';if(s.includes('egg'))return'Eggs';if(s.includes('dairy'))return'Dairy';if(s.includes('produce'))return'Produce';if(s.includes('frozen'))return'Frozen';return categories.find(c=>c.toLowerCase()===s)||'Other'}
+function normalizeUnit(v){const s=String(v||'item').toLowerCase().trim();if(['pound','pounds','lb','lbs'].includes(s))return'lbs';if(['ounce','ounces','oz'].includes(s))return'oz';if(['each','count','ct'].includes(s))return'each';return units.find(u=>u.toLowerCase()===s)||'item'}
+function fillSelect(id,arr,current){$(id).innerHTML=options(arr,current)}function options(arr,current){return arr.map(v=>'<option '+(String(v).toLowerCase()===String(current||'').toLowerCase()?'selected':'')+'>'+esc(v)+'</option>').join('')}function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
