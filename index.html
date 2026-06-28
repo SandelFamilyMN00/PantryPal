@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PantryPal v1.0.0 Cabin UI</title>
+  <title>PantryPal v1.0.3 Design System Home</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main>
-    <header class="hero compact-card">
-      <div>
+    <header class="hero app-shell-card">
+      <div class="brand-mark" aria-hidden="true">🌲</div>
+      <div class="brand-copy">
         <p class="eyebrow">Rush City Edition</p>
         <h1>PantryPal</h1>
-        <p class="muted">Mild family meals, cabin-ready staples, and local store planning.</p>
+        <p class="muted">Family Pantry Intelligence</p>
       </div>
       <p id="status" class="status-pill">Connecting...</p>
     </header>
@@ -22,84 +23,102 @@
       <button class="tab-button active" data-tab="home" type="button">Home</button>
       <button class="tab-button" data-tab="inventory" type="button">Pantry</button>
       <button class="tab-button" data-tab="recipes" type="button">Recipes</button>
-      <button class="tab-button" data-tab="addscan" type="button">Add / Scan</button>
+      <button class="tab-button" data-tab="addscan" type="button">Scan</button>
       <button class="tab-button" data-tab="grocery" type="button">Grocery</button>
       <button class="tab-button" data-tab="more" type="button">More</button>
     </nav>
 
-    <section class="tab-panel active" data-panel="home">
-      <section class="compact-card home-score-card forest-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Cabin Dashboard</p>
-            <h2>Home</h2>
-            <p class="muted">A quick Rush City look at staples, dinner, and store planning.</p>
-          </div>
+    <section class="tab-panel active home-panel" data-panel="home">
+      <section class="home-hero app-shell-card">
+        <div class="home-hero-copy">
+          <p class="eyebrow">Cabin Dashboard</p>
+          <h2>Good pantry decisions, fast.</h2>
+          <p class="muted">Know what you have, what to cook, and whether the next grocery stop is actually worth it.</p>
+        </div>
+        <div class="score-card" aria-label="Pantry Score">
           <span id="pantryScorePill" class="status-pill">0%</span>
+          <div class="score-ring"><span id="pantryScore">0</span><small>Pantry Score</small></div>
+          <p id="pantryScoreSummary" class="status-text"></p>
         </div>
-        <div class="score-ring" aria-label="Pantry Score"><span id="pantryScore">0</span><small>Pantry Score</small></div>
-        <p id="pantryScoreSummary" class="status-text"></p>
       </section>
 
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Pantry Health</p>
-            <h2>Food Categories</h2>
-          </div>
+      <section class="metric-strip" aria-label="Pantry summary metrics">
+        <div class="metric-card app-shell-card">
+          <span>🥫</span>
+          <p class="eyebrow">Inventory</p>
+          <strong id="homeInventoryStat">Live</strong>
+          <small>Synced from pantry</small>
         </div>
-        <div id="pantryHealth" class="health-list"></div>
+        <div class="metric-card app-shell-card">
+          <span>⚠️</span>
+          <p class="eyebrow">Low Stock</p>
+          <strong id="homeLowStat">Watch</strong>
+          <small>Staples and list</small>
+        </div>
+        <div class="metric-card app-shell-card">
+          <span>🍽️</span>
+          <p class="eyebrow">Meals</p>
+          <strong id="homeMealsStat">Ready</strong>
+          <small>Ideas from pantry</small>
+        </div>
+        <div class="metric-card app-shell-card">
+          <span>💵</span>
+          <p class="eyebrow">Value</p>
+          <strong id="homeValueStat">Estimate</strong>
+          <small>Food on hand</small>
+        </div>
       </section>
 
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Pantry Value</p>
-            <h2>Estimated Food Value</h2>
+      <section class="home-grid">
+        <section class="app-shell-card paper-card health-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Pantry Health</p>
+              <h2>Food Categories</h2>
+            </div>
+            <span class="card-icon">▦</span>
           </div>
-        </div>
-        <div id="pantryValue" class="value-list"></div>
-      </section>
+          <div id="pantryHealth" class="health-list"></div>
+        </section>
 
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Staples</p>
-            <h2>Staples at a Glance</h2>
+        <section class="app-shell-card paper-card dinner-card feature-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Tonight</p>
+              <h2>Tonight’s Mild Dinner Idea</h2>
+            </div>
+            <span class="card-icon">♨</span>
           </div>
-          <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
-        </div>
-        <div id="staplesGlance" class="staples-grid"></div>
-      </section>
+          <div id="tonightDinner"></div>
+        </section>
 
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Priority</p>
-            <h2>Critical Low Staples</h2>
+        <section class="app-shell-card shopping-card feature-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Smart Shopping</p>
+              <h2>Worth the trip?</h2>
+              <p class="muted">Future shopping intelligence will compare savings against mileage, fuel, time, and extra stops.</p>
+            </div>
+            <span class="card-icon">🛒</span>
           </div>
-        </div>
-        <div id="criticalStaples"></div>
-      </section>
+          <div class="trip-value">
+            <div><small>Estimated savings</small><strong>$—</strong></div>
+            <div><small>Fuel / mileage</small><strong>— mi</strong></div>
+            <div><small>Trip score</small><strong>Pending</strong></div>
+          </div>
+          <div id="storeDealsPreview"></div>
+        </section>
 
-      <section class="compact-card dinner-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Tonight</p>
-            <h2>Tonight’s Mild Dinner Idea</h2>
+        <section class="app-shell-card paper-card value-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Pantry Value</p>
+              <h2>Estimated Food Value</h2>
+            </div>
+            <span class="card-icon">$</span>
           </div>
-        </div>
-        <div id="tonightDinner"></div>
-      </section>
-
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Local</p>
-            <h2>Store / Deals Preview</h2>
-          </div>
-        </div>
-        <div id="storeDealsPreview"></div>
+          <div id="pantryValue" class="value-list"></div>
+        </section>
       </section>
     </section>
 
@@ -245,15 +264,34 @@
           <div>
             <p class="eyebrow">Settings</p>
             <h2>Rush City Edition</h2>
-            <p class="muted">Staple targets are configurable and stored on this device. Weekly ads, price history, and trip-value scoring are the next shopping intelligence pieces.</p>
+            <p class="muted">Staple targets are configurable and stored on this device.</p>
           </div>
+          <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
         </div>
         <div id="stapleTargetEditor" class="target-editor"></div>
+      </section>
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Staples</p>
+            <h2>Staples at a Glance</h2>
+          </div>
+        </div>
+        <div id="staplesGlance" class="staples-grid"></div>
+      </section>
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Priority</p>
+            <h2>Critical Low Staples</h2>
+          </div>
+        </div>
+        <div id="criticalStaples"></div>
       </section>
     </section>
 
     <footer>
-      <strong>PantryPal v1.0.0 · Cabin UI Rewrite</strong><br>
+      <strong>PantryPal v1.0.3 · Design System Home</strong><br>
       Know what you have · Buy what you need
     </footer>
   </main>
