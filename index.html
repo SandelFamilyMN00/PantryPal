@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PantryPal v0.8.0 Northwoods Edition</title>
+  <title>PantryPal v0.8.1 Rush City Edition</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -11,7 +11,7 @@
   <main>
     <header class="hero compact-card">
       <div>
-        <p class="eyebrow">Northwoods Edition</p>
+        <p class="eyebrow">Rush City Edition</p>
         <h1>PantryPal</h1>
         <p class="muted">Mild family meals, cabin-ready staples, and local store planning.</p>
       </div>
@@ -33,12 +33,32 @@
           <div>
             <p class="eyebrow">Cabin Dashboard</p>
             <h2>Home</h2>
-            <p class="muted">A quick Northwoods look at staples, dinner, and store planning.</p>
+            <p class="muted">A quick Rush City look at staples, dinner, and store planning.</p>
           </div>
           <span id="pantryScorePill" class="status-pill">0%</span>
         </div>
         <div class="score-ring" aria-label="Pantry Score"><span id="pantryScore">0</span><small>Pantry Score</small></div>
         <p id="pantryScoreSummary" class="status-text"></p>
+      </section>
+
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Pantry Health</p>
+            <h2>Food Categories</h2>
+          </div>
+        </div>
+        <div id="pantryHealth" class="health-list"></div>
+      </section>
+
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Pantry Value</p>
+            <h2>Estimated Food Value</h2>
+          </div>
+        </div>
+        <div id="pantryValue" class="value-list"></div>
       </section>
 
       <section class="compact-card">
@@ -225,7 +245,7 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">Settings</p>
-            <h2>Northwoods Edition</h2>
+            <h2>Rush City Edition</h2>
             <p class="muted">Staple targets are configurable and stored on this device. Weekly ads and price history can plug into the shopping plan structure later.</p>
           </div>
         </div>
@@ -234,8 +254,8 @@
     </section>
 
     <footer>
-      <strong>PantryPal v0.8.0 · Northwoods Edition</strong><br>
-      Deep pine pantry planning · Mild recipes · Local grocery previews
+      <strong>PantryPal v0.8.1 · Rush City Edition</strong><br>
+      Horizontal log cabin pantry planning · Mild recipes · Local grocery previews
     </footer>
   </main>
   <script src="config.js"></script>
