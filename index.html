@@ -1,20 +1,25 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PantryPal v1.0.3 Design System Home</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>PantryPal v2.0 UI</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main>
-    <header class="hero app-shell-card">
-      <div class="brand-mark" aria-hidden="true">🌲</div>
-      <div class="brand-copy">
-        <p class="eyebrow">Rush City Edition</p>
-        <h1>PantryPal</h1>
-        <p class="muted">Family Pantry Intelligence</p>
+  <main class="app-shell">
+    <header class="topbar" aria-label="PantryPal header">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">
+          <span class="tree">▲</span>
+          <span class="trunk"></span>
+        </div>
+        <div>
+          <p class="eyebrow">Rush City Edition</p>
+          <h1>PantryPal</h1>
+          <p class="muted">Family Pantry Intelligence</p>
+        </div>
       </div>
       <p id="status" class="status-pill">Connecting...</p>
     </header>
@@ -22,113 +27,181 @@
     <nav class="tabbar" aria-label="PantryPal sections">
       <button class="tab-button active" data-tab="home" type="button">Home</button>
       <button class="tab-button" data-tab="inventory" type="button">Pantry</button>
-      <button class="tab-button" data-tab="recipes" type="button">Recipes</button>
       <button class="tab-button" data-tab="addscan" type="button">Scan</button>
+      <button class="tab-button" data-tab="recipes" type="button">Recipes</button>
       <button class="tab-button" data-tab="grocery" type="button">Grocery</button>
       <button class="tab-button" data-tab="more" type="button">More</button>
     </nav>
 
     <section class="tab-panel active home-panel" data-panel="home">
-      <section class="home-hero app-shell-card">
-        <div class="home-hero-copy">
-          <p class="eyebrow">Cabin Dashboard</p>
-          <h2>Good pantry decisions, fast.</h2>
-          <p class="muted">Know what you have, what to cook, and whether the next grocery stop is actually worth it.</p>
+      <section class="dashboard-hero glass-card">
+        <div class="hero-copy">
+          <p class="eyebrow">Today’s Pantry</p>
+          <h2>Good decisions before you leave the driveway.</h2>
+          <p class="muted">Inventory, dinner, and shopping value in one quiet cabin dashboard.</p>
         </div>
-        <div class="score-card" aria-label="Pantry Score">
-          <span id="pantryScorePill" class="status-pill">0%</span>
+        <div class="score-module" aria-label="Pantry Score">
+          <span id="pantryScorePill" class="score-badge">0%</span>
           <div class="score-ring"><span id="pantryScore">0</span><small>Pantry Score</small></div>
-          <p id="pantryScoreSummary" class="status-text"></p>
+          <p id="pantryScoreSummary" class="score-summary"></p>
         </div>
       </section>
 
-      <section class="metric-strip" aria-label="Pantry summary metrics">
-        <div class="metric-card app-shell-card">
-          <span>🥫</span>
-          <p class="eyebrow">Inventory</p>
-          <strong id="homeInventoryStat">Live</strong>
-          <small>Synced from pantry</small>
-        </div>
-        <div class="metric-card app-shell-card">
-          <span>⚠️</span>
-          <p class="eyebrow">Low Stock</p>
-          <strong id="homeLowStat">Watch</strong>
-          <small>Staples and list</small>
-        </div>
-        <div class="metric-card app-shell-card">
-          <span>🍽️</span>
-          <p class="eyebrow">Meals</p>
-          <strong id="homeMealsStat">Ready</strong>
-          <small>Ideas from pantry</small>
-        </div>
-        <div class="metric-card app-shell-card">
-          <span>💵</span>
-          <p class="eyebrow">Value</p>
-          <strong id="homeValueStat">Estimate</strong>
-          <small>Food on hand</small>
-        </div>
+      <section class="metric-strip" aria-label="Pantry snapshot">
+        <article class="metric-card paper-card">
+          <span class="metric-icon">🥫</span>
+          <p>Inventory</p>
+          <strong id="homeInventoryStat">—</strong>
+        </article>
+        <article class="metric-card paper-card">
+          <span class="metric-icon">⚠️</span>
+          <p>Low Stock</p>
+          <strong id="homeLowStat">—</strong>
+        </article>
+        <article class="metric-card paper-card">
+          <span class="metric-icon">🍽️</span>
+          <p>Meals</p>
+          <strong id="homeMealsStat">—</strong>
+        </article>
+        <article class="metric-card paper-card">
+          <span class="metric-icon">💵</span>
+          <p>Value</p>
+          <strong id="homeValueStat">—</strong>
+        </article>
       </section>
 
       <section class="home-grid">
-        <section class="app-shell-card paper-card health-card">
+        <article class="paper-card health-card">
           <div class="section-head">
             <div>
               <p class="eyebrow">Pantry Health</p>
               <h2>Food Categories</h2>
             </div>
-            <span class="card-icon">▦</span>
+            <span class="soft-icon">▦</span>
           </div>
           <div id="pantryHealth" class="health-list"></div>
-        </section>
+        </article>
 
-        <section class="app-shell-card paper-card dinner-card feature-card">
+        <article class="paper-card dinner-card feature-card">
           <div class="section-head">
             <div>
               <p class="eyebrow">Tonight</p>
-              <h2>Tonight’s Mild Dinner Idea</h2>
+              <h2>Mild Dinner Idea</h2>
             </div>
-            <span class="card-icon">♨</span>
+            <span class="soft-icon">♨</span>
           </div>
+          <div class="dinner-visual" aria-hidden="true"></div>
           <div id="tonightDinner"></div>
-        </section>
+        </article>
 
-        <section class="app-shell-card shopping-card feature-card">
+        <article class="shopping-card feature-card">
           <div class="section-head">
             <div>
               <p class="eyebrow">Smart Shopping</p>
               <h2>Worth the trip?</h2>
-              <p class="muted">Future shopping intelligence will compare savings against mileage, fuel, time, and extra stops.</p>
+              <p class="muted">Savings should beat fuel, miles, time, and extra stops.</p>
             </div>
-            <span class="card-icon">🛒</span>
+            <span class="soft-icon">🛒</span>
           </div>
           <div class="trip-value">
-            <div><small>Estimated savings</small><strong>$—</strong></div>
-            <div><small>Fuel / mileage</small><strong>— mi</strong></div>
+            <div><small>Savings</small><strong>$—</strong></div>
+            <div><small>Fuel / miles</small><strong>—</strong></div>
             <div><small>Trip score</small><strong>Pending</strong></div>
           </div>
-          <div id="storeDealsPreview"></div>
-        </section>
+          <div id="storeDealsPreview" class="store-preview"></div>
+        </article>
 
-        <section class="app-shell-card paper-card value-card">
+        <article class="paper-card value-card">
           <div class="section-head">
             <div>
               <p class="eyebrow">Pantry Value</p>
-              <h2>Estimated Food Value</h2>
+              <h2>Food on Hand</h2>
             </div>
-            <span class="card-icon">$</span>
+            <span class="soft-icon">$</span>
           </div>
           <div id="pantryValue" class="value-list"></div>
+        </article>
+      </section>
+    </section>
+
+    <section class="tab-panel" data-panel="inventory">
+      <section class="page-card inventory-card">
+        <div class="section-head page-head">
+          <div>
+            <p class="eyebrow">Inventory</p>
+            <h2>Your Pantry</h2>
+            <p class="muted">Search, use, edit, and flag low-stock items.</p>
+          </div>
+          <span id="inventoryCount" class="status-pill">0 items</span>
+        </div>
+        <input id="search" class="search-input" placeholder="Search pantry, fridge, freezer, notes, or unit">
+        <div id="inventory" class="inventory-list"></div>
+      </section>
+    </section>
+
+    <section class="tab-panel" data-panel="addscan">
+      <section class="page-grid">
+        <section class="page-card scan">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Scanner</p>
+              <h2>Scan Food</h2>
+            </div>
+            <select id="scanLocation" class="small-select"></select>
+          </div>
+
+          <select id="scanMode">
+            <option value="general">General food scan</option>
+            <option value="meat_label">Meat / store label scan</option>
+          </select>
+          <p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p>
+
+          <div class="photo-actions two-col">
+            <button id="takePhotoBtn" type="button">Take Photo</button>
+            <button id="uploadPhotoBtn" type="button" class="secondary">Upload Existing Photo</button>
+          </div>
+
+          <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+          <input id="uploadInput" type="file" accept="image/*" class="hidden">
+
+          <img id="preview" class="preview hidden" alt="Preview">
+          <button id="scanBtn">Scan Photo</button>
+          <p id="scanStatus" class="status-text"></p>
+          <div id="scanResults"></div>
+          <button id="saveScanBtn" class="hidden">Save Selected Items</button>
+        </section>
+
+        <section class="page-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Stock Entry</p>
+              <h2>Add Item</h2>
+            </div>
+          </div>
+          <form id="itemForm" class="tight-form">
+            <input id="name" placeholder="Item name, e.g. Milk" required>
+            <div class="grid">
+              <select id="category"></select>
+              <select id="location"></select>
+              <input id="quantity" type="number" step="0.25" value="1">
+              <select id="unit"></select>
+            </div>
+            <input id="bestBy" type="date">
+            <textarea id="notes" placeholder="Notes"></textarea>
+            <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
+            <button>Add to Pantry</button>
+          </form>
         </section>
       </section>
     </section>
 
     <section class="tab-panel" data-panel="recipes">
-      <section class="compact-card recipe-card">
-        <div class="section-head">
+      <section class="page-card recipe-card">
+        <div class="section-head page-head">
           <div>
             <p class="eyebrow">Meals</p>
             <h2>Recipe Ideas</h2>
-            <p class="muted">Default is mild, kid-friendly, and not spicy.</p>
+            <p class="muted">Mild, kid-friendly, and pantry-first by default.</p>
           </div>
         </div>
 
@@ -170,128 +243,63 @@
           <button id="recipeBtn" type="button">Get AI Recipe Ideas</button>
         </div>
         <p id="recipeStatus" class="status-text"></p>
-        <div id="recipeIdeas"></div>
-      </section>
-    </section>
-
-    <section class="tab-panel" data-panel="inventory">
-      <section class="compact-card inventory-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Inventory</p>
-            <h2>Your Pantry</h2>
-          </div>
-          <span id="inventoryCount" class="status-pill">0 items</span>
-        </div>
-        <input id="search" placeholder="Search pantry, fridge, freezer, notes, or unit">
-        <div id="inventory"></div>
-      </section>
-    </section>
-
-    <section class="tab-panel" data-panel="addscan">
-      <section class="compact-card scan">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Scanner</p>
-            <h2>Scan Food</h2>
-          </div>
-          <select id="scanLocation" class="small-select"></select>
-        </div>
-
-        <select id="scanMode">
-          <option value="general">General food scan</option>
-          <option value="meat_label">Meat / store label scan</option>
-        </select>
-        <p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p>
-
-        <div class="photo-actions two-col">
-          <button id="takePhotoBtn" type="button">Take Photo</button>
-          <button id="uploadPhotoBtn" type="button" class="secondary">Upload Existing Photo</button>
-        </div>
-
-        <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
-        <input id="uploadInput" type="file" accept="image/*" class="hidden">
-
-        <img id="preview" class="preview hidden" alt="Preview">
-        <button id="scanBtn">Scan Photo</button>
-        <p id="scanStatus" class="status-text"></p>
-        <div id="scanResults"></div>
-        <button id="saveScanBtn" class="hidden">Save Selected Items</button>
-      </section>
-
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Stock Entry</p>
-            <h2>Add Item</h2>
-          </div>
-        </div>
-        <form id="itemForm" class="tight-form">
-          <input id="name" placeholder="Item name, e.g. Milk" required>
-          <div class="grid">
-            <select id="category"></select>
-            <select id="location"></select>
-            <input id="quantity" type="number" step="0.25" value="1">
-            <select id="unit"></select>
-          </div>
-          <input id="bestBy" type="date">
-          <textarea id="notes" placeholder="Notes"></textarea>
-          <label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label>
-          <button>Add to Pantry</button>
-        </form>
+        <div id="recipeIdeas" class="recipe-list"></div>
       </section>
     </section>
 
     <section class="tab-panel" data-panel="grocery">
-      <section class="compact-card">
-        <div class="section-head">
+      <section class="page-card">
+        <div class="section-head page-head">
           <div>
             <p class="eyebrow">Shopping</p>
             <h2>Grocery List</h2>
+            <p class="muted">Low-stock staples, recipe gaps, and manual adds.</p>
           </div>
         </div>
         <div class="manual-grocery">
           <input id="manualGroceryName" placeholder="Add grocery item">
           <button id="manualGroceryBtn" type="button">Add to List</button>
         </div>
-        <div id="groceryList"></div>
+        <div id="groceryList" class="grocery-list"></div>
       </section>
     </section>
 
     <section class="tab-panel" data-panel="more">
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Settings</p>
-            <h2>Rush City Edition</h2>
-            <p class="muted">Staple targets are configurable and stored on this device.</p>
+      <section class="page-grid">
+        <section class="page-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h2>Rush City Edition</h2>
+              <p class="muted">Staple targets are configurable and stored on this device.</p>
+            </div>
+            <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
           </div>
-          <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
-        </div>
-        <div id="stapleTargetEditor" class="target-editor"></div>
-      </section>
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Staples</p>
-            <h2>Staples at a Glance</h2>
+          <div id="stapleTargetEditor" class="target-editor"></div>
+        </section>
+        <section class="page-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Staples</p>
+              <h2>Staples at a Glance</h2>
+            </div>
           </div>
-        </div>
-        <div id="staplesGlance" class="staples-grid"></div>
-      </section>
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Priority</p>
-            <h2>Critical Low Staples</h2>
+          <div id="staplesGlance" class="staples-grid"></div>
+        </section>
+        <section class="page-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Priority</p>
+              <h2>Critical Low Staples</h2>
+            </div>
           </div>
-        </div>
-        <div id="criticalStaples"></div>
+          <div id="criticalStaples"></div>
+        </section>
       </section>
     </section>
 
     <footer>
-      <strong>PantryPal v1.0.3 · Design System Home</strong><br>
+      <strong>PantryPal v2.0 · Premium UI Pass</strong><br>
       Know what you have · Buy what you need
     </footer>
   </main>
