@@ -14,13 +14,14 @@ const defaultStapleTargets=[
  {name:'Rice',target:5,unit:'lbs',aliases:['rice']},
  {name:'Tortillas',target:2,unit:'pack',aliases:['tortillas','tortilla']}
 ];
-const preferredStores=['Walmart Pine City','Walmart Cambridge','ALDI Cambridge','Target Cambridge','Coborn’s Pine City','Costco Coon Rapids','Costco Woodbury'];
+const preferredStores=['Walmart Pine City','Walmart Cambridge','ALDI Cambridge','Target Cambridge','Coborn’s Pine City','Jerry’s Foods North Branch','Costco Coon Rapids','Costco Woodbury'];
 const mockDeals={
  'Walmart Pine City':['Ground Beef family packs','Milk and eggs basics'],
  'Walmart Cambridge':['Pantry pasta rollback','Cheese and butter stock-up'],
  'ALDI Cambridge':['Bread, tortillas, rice value picks','Mild dinner staples'],
  'Target Cambridge':['Household add-ons','Drive-up grocery fill-ins'],
  'Coborn’s Pine City':['Local dairy preview','Fresh bakery bread'],
+ 'Jerry’s Foods North Branch':['Weekly meat and produce ad watch','Local grocery fill-in pricing'],
  'Costco Coon Rapids':['Bulk chicken and cheese','Rice and freezer staples'],
  'Costco Woodbury':['Bulk ground beef and butter','Family pantry cases']
 };
