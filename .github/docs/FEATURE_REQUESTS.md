@@ -93,5 +93,15 @@ Future:
 - Warm wood colors
 - Mobile-first design
 - Large touch buttons
+- ## Shopping Intelligence
+
+- Trip Value Calculator
+  - Compare savings vs. extra driving distance.
+  - Estimate fuel cost.
+  - Estimate additional drive time.
+  - Allow the user to set a dollar value for their time.
+  - Recommend whether a second or third store is actually worth visiting.
+  - Example:
+    "Costco saves $31 but adds 42 miles. Worth the trip only if purchasing bulk meat."
 - Fast loading
 - Offline mode
