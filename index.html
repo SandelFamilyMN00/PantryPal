@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PantryPal v0.9.0 Rush City Edition</title>
+  <title>PantryPal v1.0.1 Cabin UI</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -27,31 +27,54 @@
       <button class="tab-button" data-tab="more" type="button">More</button>
     </nav>
 
-    <section class="tab-panel active" data-panel="home">
-      <section class="compact-card home-score-card forest-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Cabin Dashboard</p>
-            <h2>Home</h2>
-            <p class="muted">A quick Rush City look at staples, dinner, and store planning.</p>
+    <section class="tab-panel active home-dashboard" data-panel="home">
+      <section class="dashboard-hero cabin-dashboard-card">
+        <div class="dashboard-copy">
+          <p class="eyebrow">Cabin Dashboard</p>
+          <h2>PantryPal Home</h2>
+          <p class="muted">A polished Rush City snapshot for staples, dinner, grocery value, and what to buy next.</p>
+          <div class="mini-stats" aria-label="Dashboard summary">
+            <div><strong id="homeInventoryStat">0</strong><span>Items</span></div>
+            <div><strong id="homeLowStat">0</strong><span>Low</span></div>
+            <div><strong id="homeMealStat">0</strong><span>Meals</span></div>
           </div>
-          <span id="pantryScorePill" class="status-pill">0%</span>
         </div>
         <div class="score-ring" aria-label="Pantry Score"><span id="pantryScore">0</span><small>Pantry Score</small></div>
-        <p id="pantryScoreSummary" class="status-text"></p>
+        <span id="pantryScorePill" class="status-pill score-badge">0%</span>
+        <p id="pantryScoreSummary" class="status-text dashboard-summary"></p>
       </section>
 
-      <section class="compact-card">
+      <section class="compact-card pantry-health-card">
         <div class="section-head">
           <div>
             <p class="eyebrow">Pantry Health</p>
-            <h2>Food Categories</h2>
+            <h2>Food Coverage</h2>
           </div>
         </div>
         <div id="pantryHealth" class="health-list"></div>
       </section>
 
-      <section class="compact-card">
+      <section class="compact-card dinner-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Tonight</p>
+            <h2>Tonight’s Dinner</h2>
+          </div>
+        </div>
+        <div id="tonightDinner"></div>
+      </section>
+
+      <section class="compact-card smart-shopping-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Smart Shopping</p>
+            <h2>Recommendation</h2>
+          </div>
+        </div>
+        <div id="storeDealsPreview"></div>
+      </section>
+
+      <section class="compact-card pantry-value-card">
         <div class="section-head">
           <div>
             <p class="eyebrow">Pantry Value</p>
@@ -59,47 +82,6 @@
           </div>
         </div>
         <div id="pantryValue" class="value-list"></div>
-      </section>
-
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Staples</p>
-            <h2>Staples at a Glance</h2>
-          </div>
-          <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
-        </div>
-        <div id="staplesGlance" class="staples-grid"></div>
-      </section>
-
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Priority</p>
-            <h2>Critical Low Staples</h2>
-          </div>
-        </div>
-        <div id="criticalStaples"></div>
-      </section>
-
-      <section class="compact-card dinner-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Tonight</p>
-            <h2>Tonight’s Mild Dinner Idea</h2>
-          </div>
-        </div>
-        <div id="tonightDinner"></div>
-      </section>
-
-      <section class="compact-card">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Local</p>
-            <h2>Store / Deals Preview</h2>
-          </div>
-        </div>
-        <div id="storeDealsPreview"></div>
       </section>
     </section>
 
@@ -250,10 +232,31 @@
         </div>
         <div id="stapleTargetEditor" class="target-editor"></div>
       </section>
+
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Staples</p>
+            <h2>Staples at a Glance</h2>
+          </div>
+          <button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button>
+        </div>
+        <div id="staplesGlance" class="staples-grid"></div>
+      </section>
+
+      <section class="compact-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Priority</p>
+            <h2>Critical Low Staples</h2>
+          </div>
+        </div>
+        <div id="criticalStaples"></div>
+      </section>
     </section>
 
     <footer>
-      <strong>PantryPal v0.9.0 · Rush City Edition</strong><br>
+      <strong>PantryPal v1.0.1 · Cabin UI Rewrite</strong><br>
       Know what you have · Buy what you need
     </footer>
   </main>
