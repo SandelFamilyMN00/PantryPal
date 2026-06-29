@@ -1,30 +1,64 @@
 (() => {
-  const pdfJsUrl='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
-  const pdfWorkerUrl='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
-  const cats=['Meat','Beef','Chicken','Pork','Fish/Seafood','Dairy','Eggs','Produce','Bakery','Dry Goods','Canned Goods','Condiments','Snacks','Frozen','Beverages','Household','Other'];
-  const locs=['Pantry','Fridge','Freezer','Garage Freezer','Kitchen Cupboard 1','Kitchen Cupboard 2','Kitchen Cupboard 3','Basement Fridge','Small Fridge','Small Freezer'];
-  const units=['item','each','lb','lbs','oz','gallon','can','box','bag','bottle','jar','pack','loaf','dozen'];
-  const $=id=>document.getElementById(id);
-  const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-  const opts=(arr,cur)=>arr.map(v=>`<option ${String(v).toLowerCase()===String(cur||'').toLowerCase()?'selected':''}>${esc(v)}</option>`).join('');
-  async function wait(){for(let i=0;i<80;i++){if($('receiptFileInput')&&$('receiptParseBtn')&&$('receiptText')&&$('receiptReview'))return setup();await new Promise(r=>setTimeout(r,100));}}
-  async function pdfText(file){const mod=window.pdfjsLib||await import(pdfJsUrl);mod.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;window.pdfjsLib=mod;const pdf=await mod.getDocument({data:await file.arrayBuffer()}).promise;const out=[];for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p);const txt=await page.getTextContent();out.push(txt.items.map(x=>x.str).join('\n'));}return out.join('\n');}
-  function setup(){
-    const fileInput=$('receiptFileInput'), parseBtn=$('receiptParseBtn');
-    fileInput.accept='image/*,.pdf,application/pdf,.txt,.csv';
-    if($('receiptPhotoBtn'))$('receiptPhotoBtn').textContent='Upload Receipt Photo / PDF';
-    fileInput.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f||!(f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf')))return;try{if($('receiptFileStatus'))$('receiptFileStatus').textContent=`Selected PDF: ${f.name}`;$('receiptStatus').textContent='Reading Walmart PDF receipt...';$('receiptText').value=await pdfText(f);$('receiptStatus').textContent='PDF loaded. Click Parse Receipt.';}catch(err){$('receiptStatus').textContent='Could not read PDF text: '+err.message;}},true);
-    parseBtn.addEventListener('click',e=>{const text=($('receiptText').value||'').trim();if(!text)return;e.preventDefault();e.stopImmediatePropagation();render(parse(text));},true);
+  const pdfJsUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
+  const pdfWorkerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+
+  const $ = id => document.getElementById(id);
+
+  async function wait(){
+    for(let i = 0; i < 80; i++){
+      if($('receiptFileInput') && $('receiptStatus') && $('receiptText')) return setup();
+      await new Promise(r => setTimeout(r, 100));
+    }
   }
-  function parse(text){const rows=[];String(text).replace(/\r/g,'\n').split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean).forEach(line=>{const m=line.match(/\bQty\s+(\d+(?:\.\d+)?)\s+\$\s*(\d+\.\d{2})\s*$/i);if(!m)return;let name=line.slice(0,m.index).replace(/\s+\d+\s+(?:weight-adjusted items?|shopped)\s*$/i,'').trim();name=clean(name);if(!name||/invoice|order#|subtotal|tax|total|payment|savings/i.test(name))return;const quantity=Number(m[1])||1,total_price=Number(m[2])||0,category=cat(name),location=loc(name,category),a=amount(name,quantity,category);rows.push({name,quantity,total_price,category,location,amount:a.amount,amount_unit:a.unit,skip:category==='Household'});});return unique(rows);}
-  function clean(s){return String(s||'').replace(/FlavorInstant/ig,'Flavor Instant').replace(/pack of(\d+)/ig,'pack of $1').replace(/,([0-9]+(?:\.[0-9]+)?)(lb|oz)/ig,', $1 $2').replace(/\b\d+\s+(?:weight-adjusted items?|shopped)\b/ig,'').replace(/\s{2,}/g,' ').trim();}
-  function cat(n){const s=n.toLowerCase();if(/softener|paper towel|toilet paper|charmin|detergent|soap|battery|trash bag|cat litter|pet food/.test(s))return'Household';if(/ground beef|beef|chuck|steak/.test(s))return'Beef';if(/chicken/.test(s))return'Chicken';if(/pork|bacon|ham/.test(s))return'Pork';if(/fish|shrimp|salmon|tuna/.test(s))return'Fish/Seafood';if(/milk|cheese|butter|yogurt|cream/.test(s))return'Dairy';if(/egg/.test(s))return'Eggs';if(/banana|onion|grape|strawberr|avocado|lettuce|spinach|tomato|apple|potato/.test(s))return'Produce';if(/frozen|fries|peas|freeze pop|funpops/.test(s))return'Frozen';if(/bread|bun|roll|tortilla/.test(s))return'Bakery';if(/corn|mushroom|fruit cocktail|beans/.test(s))return'Canned Goods';if(/sauce|pickle|dressing|salsa/.test(s))return'Condiments';if(/cracker|cookie|cereal|granola|ramen/.test(s))return'Snacks';if(/juice|coffee|soda|water/.test(s))return'Beverages';return'Dry Goods';}
-  function loc(n,c){const s=n.toLowerCase();if(c==='Frozen'||/frozen|fries|peas|freeze pop|funpops/.test(s))return'Freezer';if(['Beef','Chicken','Pork','Fish/Seafood'].includes(c))return'Freezer';if(['Dairy','Eggs'].includes(c))return'Fridge';if(c==='Produce')return/banana|onion/.test(s)?'Pantry':'Fridge';return'Pantry';}
-  function amount(n,q,c){const s=n.toLowerCase();let m=s.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pound|pounds)\b/);if(m)return{amount:Math.round(Number(m[1])*q*100)/100,unit:'lb'};m=s.match(/(\d+(?:\.\d+)?)\s*(?:fl oz|oz)\b/);if(m)return{amount:Math.round(Number(m[1])*q*100)/100,unit:'oz'};if(/gallon/.test(s))return{amount:q,unit:'gallon'};if(c==='Bakery'&&/bread/.test(s))return{amount:q,unit:'loaf'};m=s.match(/(\d+)\s*(?:count|ct|rolls|bars|pouches)\b/i);if(m)return{amount:Number(m[1])*q,unit:'each'};return{amount:q,unit:'each'};}
-  function unique(rows){const map=new Map();rows.forEach(r=>{const k=r.name.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()+'|'+r.quantity+'|'+r.total_price;if(!map.has(k))map.set(k,r);});return[...map.values()];}
-  function render(rows){const review=$('receiptReview');if(!rows.length){$('receiptStatus').textContent='No Walmart item rows found. Parser now only accepts lines with Qty and a final item price.';$('receiptSaveBtn')?.classList.add('hidden');$('receiptSummary')?.classList.add('hidden');review.innerHTML='';return;}const track=rows.filter(r=>!r.skip),skip=rows.filter(r=>r.skip),total=track.reduce((n,r)=>n+(Number(r.total_price)||0),0);$('receiptSummary')?.classList.remove('hidden');$('receiptSummary').innerHTML=`<div><small>Trackable items</small><strong>${track.length}</strong></div><div><small>Skipped/non-food</small><strong>${skip.length}</strong></div><div><small>Trackable food total</small><strong>$${total.toFixed(2)}</strong></div>`;review.innerHTML=rows.map((r,i)=>`<div class="receipt-row" data-i="${i}"><input class="receipt-save" type="checkbox" ${r.skip?'':'checked'} aria-label="Save ${esc(r.name)}"><input class="receipt-name" value="${esc(r.name)}"><input class="receipt-qty" type="number" step="0.25" value="${esc(r.quantity)}" title="Receipt Qty"><select class="receipt-category">${opts(cats,r.category)}</select><select class="receipt-location">${opts(locs,r.location)}</select><input class="receipt-price" type="number" step="0.01" value="${esc(r.total_price)}" placeholder="total $"><input class="receipt-amount" type="number" step="0.01" value="${esc(r.amount)}" placeholder="amount"><select class="receipt-amount-unit">${opts(units,r.amount_unit)}</select></div>`).join('');$('receiptStatus').textContent=`Found ${rows.length} ordered Walmart item line(s). Household/non-food is unchecked by default. Review, then save.`;$('receiptSaveBtn')?.classList.remove('hidden');}
-  function loadCleanup(){if(document.querySelector('script[src="cleanup-inventory.js"]'))return;const s=document.createElement('script');s.src='cleanup-inventory.js?v=1';document.body.appendChild(s);}
+
+  async function pdfText(file){
+    const mod = window.pdfjsLib || await import(pdfJsUrl);
+    mod.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    window.pdfjsLib = mod;
+    const pdf = await mod.getDocument({ data: await file.arrayBuffer() }).promise;
+    const out = [];
+    for(let p = 1; p <= pdf.numPages; p++){
+      const page = await pdf.getPage(p);
+      const txt = await page.getTextContent();
+      out.push(txt.items.map(x => x.str).join('\n'));
+    }
+    return out.join('\n');
+  }
+
+  function setup(){
+    const fileInput = $('receiptFileInput');
+
+    // Expand file input to accept PDFs
+    fileInput.accept = 'image/*,.pdf,application/pdf,.txt,.csv';
+    if($('receiptPhotoBtn')) $('receiptPhotoBtn').textContent = 'Upload Receipt Photo / PDF';
+
+    // PDF only — extract text into textarea, then let walmart-receipt-fix.js parse it
+    fileInput.addEventListener('change', async e => {
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+      if(!isPdf) return; // non-PDFs handled by receipt-import.js
+      try {
+        if($('receiptFileStatus')) $('receiptFileStatus').textContent = `Selected PDF: ${f.name}`;
+        $('receiptStatus').textContent = 'Reading PDF receipt...';
+        $('receiptText').value = await pdfText(f);
+        $('receiptStatus').textContent = 'PDF text extracted. Click Parse Receipt.';
+      } catch(err){
+        $('receiptStatus').textContent = 'Could not read PDF: ' + err.message;
+      }
+    }, true);
+
+    loadCleanup();
+  }
+
+  function loadCleanup(){
+    if(document.querySelector('script[src="cleanup-inventory.js"]')) return;
+    const s = document.createElement('script');
+    s.src = 'cleanup-inventory.js?v=1';
+    document.body.appendChild(s);
+  }
+
   wait();
-  document.addEventListener('DOMContentLoaded',loadCleanup);
-  if(document.readyState!=='loading')loadCleanup();
+  document.addEventListener('DOMContentLoaded', loadCleanup);
+  if(document.readyState !== 'loading') loadCleanup();
 })();
