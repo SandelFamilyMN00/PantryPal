@@ -131,82 +131,16 @@
       <section class="page-grid"><section class="page-card"><div class="page-head"><div><p class="eyebrow">Settings</p><h2>Rush City Edition</h2><p class="muted">Staple targets are configurable and stored on this device.</p></div><button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button></div><div id="stapleTargetEditor" class="target-editor"></div></section></section>
     </section>
 
-
     <div id="itemDrawerBackdrop" class="drawer-backdrop hidden" onclick="closeItemDrawer()" aria-hidden="true"></div>
     <aside id="itemDrawer" class="item-drawer" aria-hidden="true" aria-label="Item details and price history">
-      <div class="drawer-topbar">
-        <div>
-          <p class="eyebrow">Item Intelligence</p>
-          <h2 id="drawerItemName">Item Details</h2>
-          <p id="drawerItemSub" class="muted">Inventory, purchase history, and store comparison.</p>
-        </div>
-        <button class="icon-button close-drawer" type="button" onclick="closeItemDrawer()" aria-label="Close item details">×</button>
-      </div>
-
+      <div class="drawer-topbar"><div><p class="eyebrow">Item Intelligence</p><h2 id="drawerItemName">Item Details</h2><p id="drawerItemSub" class="muted">Inventory, purchase history, and store comparison.</p></div><button class="icon-button close-drawer" type="button" onclick="closeItemDrawer()" aria-label="Close item details">×</button></div>
       <div class="drawer-grid">
-        <section class="drawer-card current-stock-card">
-          <p class="eyebrow">Current Stock</p>
-          <div id="drawerCurrentStock" class="stock-snapshot"></div>
-        </section>
-
-        <section class="drawer-card buy-verdict-card">
-          <p class="eyebrow">Buy Recommendation</p>
-          <div id="drawerBuyVerdict"></div>
-        </section>
-
-        <section class="drawer-card chart-card">
-          <div class="drawer-section-head">
-            <div><p class="eyebrow">Price History</p><h3 id="drawerChartTitle">$/unit over time</h3></div>
-            <span id="drawerPriceBasis" class="chip">price book</span>
-          </div>
-          <div id="drawerPriceChart" class="price-chart"></div>
-        </section>
-
-        <section class="drawer-card store-compare-card">
-          <p class="eyebrow">Store Comparison</p>
-          <div id="drawerStoreCompare" class="store-compare-list"></div>
-        </section>
-
-        <section class="drawer-card purchase-log-card">
-          <p class="eyebrow">Purchase Log</p>
-          <div id="drawerPurchaseLog" class="purchase-log"></div>
-        </section>
-
-        <section class="drawer-card add-price-card">
-          <p class="eyebrow">Add Price Point</p>
-          <div class="price-entry-grid">
-            <label>Store
-              <select id="priceStore">
-                <option>Walmart Pine City</option>
-                <option>ALDI Pine City</option>
-                <option>Walmart Cambridge</option>
-                <option>ALDI Cambridge</option>
-                <option>Costco Coon Rapids</option>
-                <option>Coborn’s Pine City</option>
-              </select>
-            </label>
-            <label>Date
-              <input id="priceDate" type="date">
-            </label>
-            <label>Total price
-              <input id="priceTotal" type="number" step="0.01" placeholder="23.02">
-            </label>
-            <label>Amount / weight
-              <input id="priceAmount" type="number" step="0.01" placeholder="9.28">
-            </label>
-            <label>Unit
-              <select id="priceUnit">
-                <option>lb</option>
-                <option>each</option>
-                <option>gallon</option>
-                <option>oz</option>
-                <option>pack</option>
-              </select>
-            </label>
-            <button id="savePriceRecordBtn" type="button">Save Price Point</button>
-          </div>
-          <p class="muted">Use this for receipt values until Walmart/ALDI receipt import is wired in.</p>
-        </section>
+        <section class="drawer-card current-stock-card"><p class="eyebrow">Current Stock</p><div id="drawerCurrentStock" class="stock-snapshot"></div></section>
+        <section class="drawer-card buy-verdict-card"><p class="eyebrow">Buy Recommendation</p><div id="drawerBuyVerdict"></div></section>
+        <section class="drawer-card chart-card"><div class="drawer-section-head"><div><p class="eyebrow">Price History</p><h3 id="drawerChartTitle">$/unit over time</h3></div><span id="drawerPriceBasis" class="chip">price book</span></div><div id="drawerPriceChart" class="price-chart"></div></section>
+        <section class="drawer-card store-compare-card"><p class="eyebrow">Store Comparison</p><div id="drawerStoreCompare" class="store-compare-list"></div></section>
+        <section class="drawer-card purchase-log-card"><p class="eyebrow">Purchase Log</p><div id="drawerPurchaseLog" class="purchase-log"></div></section>
+        <section class="drawer-card add-price-card"><p class="eyebrow">Add Price Point</p><div class="price-entry-grid"><label>Store<select id="priceStore"><option>Walmart Pine City</option><option>ALDI Pine City</option><option>Walmart Cambridge</option><option>ALDI Cambridge</option><option>Costco Coon Rapids</option><option>Coborn’s Pine City</option></select></label><label>Date<input id="priceDate" type="date"></label><label>Total price<input id="priceTotal" type="number" step="0.01" placeholder="23.02"></label><label>Amount / weight<input id="priceAmount" type="number" step="0.01" placeholder="9.28"></label><label>Unit<select id="priceUnit"><option>lb</option><option>each</option><option>gallon</option><option>oz</option><option>pack</option></select></label><button id="savePriceRecordBtn" type="button">Save Price Point</button></div><p class="muted">Use this for receipt values until Walmart/ALDI receipt import is wired in.</p></section>
       </div>
     </aside>
 
@@ -214,5 +148,6 @@
   </main>
   <script src="config.js"></script>
   <script src="app.js"></script>
+  <script src="receipt-import.js"></script>
 </body>
 </html>
