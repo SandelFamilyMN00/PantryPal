@@ -14,9 +14,9 @@
     @media(max-width:820px){.receipt-actions,.receipt-summary{grid-template-columns:1fr}.receipt-row{grid-template-columns:auto 1fr}.receipt-row > *:not(input[type=checkbox]){grid-column:2}.receipt-row label{grid-column:1 / -1}}
   `;
   const stores = ['Walmart Pine City','ALDI Pine City','Walmart Cambridge','ALDI Cambridge','Target Cambridge','Coborn’s Pine City','Jerry’s Foods North Branch','Costco Coon Rapids','Costco Woodbury'];
-  const units = ['item','each','lb','lbs','oz','gallon','can','box','bag','bottle','jar','pack','loaf','dozen'];
-  const locations = ['Pantry','Fridge','Freezer','Garage Freezer','Kitchen Cupboard 1','Kitchen Cupboard 2','Kitchen Cupboard 3','Basement Fridge','Small Fridge','Small Freezer'];
-  const categories = ['Meat','Beef','Chicken','Pork','Fish/Seafood','Dairy','Eggs','Produce','Bakery','Dry Goods','Canned Goods','Condiments','Snacks','Frozen','Beverages','Household','Other'];
+  const units = ['item','each','lb','lbs','oz','gallon','can','box','bag','bottle','jar','pack','loaf','dozen','roll','rolls'];
+  const locations = ['Pantry','Fridge','Freezer','Garage Freezer','Kitchen Cupboard 1','Kitchen Cupboard 2','Kitchen Cupboard 3','Basement Fridge','Small Fridge','Small Freezer','Bathroom Closet','Laundry Room','Utility Room','Garage Shelf'];
+  const categories = ['Meat','Beef','Chicken','Pork','Fish/Seafood','Dairy','Eggs','Produce','Bakery','Dry Goods','Canned Goods','Condiments','Snacks','Frozen','Beverages','Household','Paper Goods','Cleaning','Personal Care','Pet Supplies','Other'];
   let parsedReceiptItems = [];
   let receiptFile = null;
 
@@ -29,7 +29,6 @@
     const style = document.createElement('style');
     style.textContent = receiptStyles;
     document.head.appendChild(style);
-
     const panel = document.querySelector('[data-panel="addscan"] .page-grid') || document.querySelector('[data-panel="addscan"]');
     if (!panel) return;
     const card = document.createElement('section');
@@ -37,36 +36,22 @@
     card.id = 'receiptImportCard';
     card.innerHTML = `
       <div class="page-head">
-        <div>
-          <p class="eyebrow">Receipt Import</p>
-          <h2>Upload Store Receipt</h2>
-          <p class="muted">Use Walmart, ALDI, Costco, Coborn's, or other store receipts. Review before saving to inventory and price history.</p>
-        </div>
+        <div><p class="eyebrow">Receipt Import</p><h2>Upload Store Receipt</h2><p class="muted">Use store receipts for food, household supplies, paper goods, cleaning supplies, and price history. Review before saving.</p></div>
         <span class="chip">Beta</span>
       </div>
-      <label>Store
-        <select id="receiptStore">${opts(stores,'Walmart Pine City')}</select>
-      </label>
-      <label>Receipt date
-        <input id="receiptDate" type="date">
-      </label>
-      <div class="receipt-actions">
-        <button id="receiptPhotoBtn" type="button">Upload Receipt Photo</button>
-        <button id="receiptParseBtn" type="button" class="secondary">Parse Receipt</button>
-      </div>
-      <input id="receiptFileInput" type="file" accept="image/*,.txt,.csv" class="hidden">
+      <label>Store<select id="receiptStore">${opts(stores,'Walmart Pine City')}</select></label>
+      <label>Receipt date<input id="receiptDate" type="date"></label>
+      <div class="receipt-actions"><button id="receiptPhotoBtn" type="button">Upload Receipt Photo / PDF</button><button id="receiptParseBtn" type="button" class="secondary">Parse Receipt</button></div>
+      <input id="receiptFileInput" type="file" accept="image/*,.pdf,application/pdf,.txt,.csv" class="hidden">
       <p id="receiptFileStatus" class="muted">No receipt selected yet.</p>
-      <label>Digital receipt text / copied order lines
-        <textarea id="receiptText" placeholder="Paste Walmart or ALDI receipt/order text here. Example: 2 Great Value 2% Milk Gallon $3.92"></textarea>
-      </label>
-      <p id="receiptStatus" class="receipt-status muted">Upload a receipt photo or paste digital receipt text, then parse it.</p>
+      <label>Digital receipt text / copied order lines<textarea id="receiptText" placeholder="Paste Walmart or ALDI receipt/order text here."></textarea></label>
+      <p id="receiptStatus" class="receipt-status muted">Upload a receipt photo/PDF or paste digital receipt text, then parse it.</p>
       <div id="receiptSummary" class="receipt-summary hidden"></div>
       <div id="receiptReview" class="receipt-review"></div>
-      <button id="receiptSaveBtn" type="button" class="hidden">Save Checked Items to Pantry + Price History</button>
+      <button id="receiptSaveBtn" type="button" class="hidden">Save Checked Items to Inventory + Price History</button>
     `;
     panel.prepend(card);
-    const today = new Date().toISOString().slice(0,10);
-    $('receiptDate').value = today;
+    $('receiptDate').value = new Date().toISOString().slice(0,10);
     $('receiptPhotoBtn').addEventListener('click',()=>$('receiptFileInput').click());
     $('receiptFileInput').addEventListener('change',handleReceiptFile);
     $('receiptParseBtn').addEventListener('click',parseReceipt);
@@ -81,18 +66,14 @@
       $('receiptText').value = await receiptFile.text();
       $('receiptStatus').textContent = 'Text receipt loaded. Click Parse Receipt.';
     } else {
-      $('receiptStatus').textContent = 'Image selected. Click Parse Receipt. PantryPal will try the existing scan backend first; if it cannot read the receipt yet, paste the digital receipt text here.';
+      $('receiptStatus').textContent = 'File selected. Click Parse Receipt. PDFs are handled by the Walmart parser; images use the scan backend when available.';
     }
   }
 
   async function parseReceipt(){
     $('receiptStatus').textContent = 'Parsing receipt...';
     const text = ($('receiptText').value || '').trim();
-    if(text){
-      parsedReceiptItems = parseReceiptText(text);
-      renderReceiptReview(parsedReceiptItems);
-      return;
-    }
+    if(text){ parsedReceiptItems = parseReceiptText(text); renderReceiptReview(parsedReceiptItems); return; }
     if(receiptFile && receiptFile.type.startsWith('image/')){
       try{
         const imageBase64 = await imageToBase64(receiptFile);
@@ -103,114 +84,79 @@
         parsedReceiptItems = (data.items || []).map(normalizeScanItem);
         if(!parsedReceiptItems.length) throw new Error('No items came back from the receipt image.');
         renderReceiptReview(parsedReceiptItems);
-      } catch(err){
-        $('receiptStatus').textContent = 'Receipt photo OCR is not fully connected yet: ' + err.message + ' Paste the digital receipt text/order lines and click Parse Receipt.';
-      }
+      } catch(err){ $('receiptStatus').textContent = 'Receipt photo OCR is not fully connected yet: ' + err.message + ' Paste the digital receipt text/order lines and click Parse Receipt.'; }
       return;
     }
-    $('receiptStatus').textContent = 'Paste digital receipt text or upload a receipt photo first.';
+    $('receiptStatus').textContent = 'Paste digital receipt text or upload a receipt file first.';
   }
 
   function parseReceiptText(text){
     const lines = text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
-    const skip = /subtotal|estimated total|total|checkout|remove|save for later|subscribe|return|snap|gift|bought|best seller|search walmart|limited time|items$/i;
+    const skip = /subtotal|estimated total|checkout|remove|save for later|subscribe|return|snap|gift|bought|best seller|search walmart|limited time|^total$|^tax/i;
     const items = [];
     for(const raw of lines){
       if(skip.test(raw)) continue;
       const moneyMatches = [...raw.matchAll(/\$\s*(\d+(?:\.\d{1,2})?)/g)].map(m=>Number(m[1]));
-      const hasFoodWords = /beef|chicken|milk|egg|bread|cheese|banana|strawberr|avocado|lettuce|corn|pickle|pasta|sauce|mushroom|peas|fries|cracker|cookie|juice|fruit|tortilla|rice|butter|yogurt|pork|turkey|ham|bacon/i.test(raw);
-      if(!moneyMatches.length && !hasFoodWords) continue;
+      const usefulWords = /beef|chicken|milk|egg|bread|cheese|banana|strawberr|avocado|lettuce|corn|pickle|pasta|sauce|mushroom|peas|fries|cracker|cookie|juice|fruit|rice|butter|yogurt|pork|turkey|ham|bacon|toilet paper|paper towel|charmin|bounty|softener|salt|detergent|soap|trash bag|cleaner|shampoo|conditioner/i.test(raw);
+      if(!moneyMatches.length && !usefulWords) continue;
       let name = raw.replace(/\$\s*\d+(?:\.\d{1,2})?/g,'').replace(/\b\d+\.\d+\s*(?:ea|lb|oz|fl oz)\b/ig,'').replace(/\b(?:avg|ea|SNAP|EBT|eligible|Multiplack|Multipack|Quantity)\b.*$/i,'').replace(/\s{2,}/g,' ').trim();
       if(!name || name.length < 3) continue;
       const qtyMatch = raw.match(/^\s*(\d+)\s*[xX]?\s+(.+)/);
       let qty = qtyMatch ? Number(qtyMatch[1]) : 1;
       if(qtyMatch) name = qtyMatch[2].replace(/\$\s*\d+(?:\.\d{1,2})?/g,'').trim();
-      const weight = guessAmount(raw,name);
+      const amountInfo = guessAmount(raw,name,qty);
       const totalPrice = moneyMatches.length ? moneyMatches[moneyMatches.length-1] : '';
       const category = guessCategory(name);
       const location = guessLocation(name,category);
-      items.push({name,quantity:qty,unit:weight.unit==='lb'?'lbs':'item',category,location,total_price:totalPrice,amount:weight.amount || qty,amount_unit:weight.unit || 'each'});
+      items.push({name,quantity:qty,unit:amountInfo.inventoryUnit || (amountInfo.unit==='lb'?'lbs':'item'),category,location,total_price:totalPrice,amount:amountInfo.amount || qty,amount_unit:amountInfo.unit || 'each'});
     }
     return mergeSimilar(items).slice(0,80);
   }
 
-  function guessAmount(raw,name){
+  function guessAmount(raw,name,qty=1){
     const s = `${raw} ${name}`.toLowerCase();
-    let m = s.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pound|pounds)\b/);
-    if(m) return {amount:Number(m[1]),unit:'lb'};
-    m = s.match(/(\d+(?:\.\d+)?)\s*(?:fl oz|oz)\b/);
-    if(m) return {amount:Number(m[1]),unit:'oz'};
-    if(/gallon/.test(s)) return {amount:1,unit:'gallon'};
-    m = s.match(/(\d+)\s*count\b/);
-    if(m) return {amount:Number(m[1]),unit:'each'};
-    return {amount:1,unit:'each'};
+    let m = s.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pound|pounds)\b/); if(m) return {amount:Number(m[1])*qty,unit:'lb',inventoryUnit:'lbs'};
+    m = s.match(/(\d+(?:\.\d+)?)\s*(?:fl oz|oz)\b/); if(m) return {amount:Number(m[1])*qty,unit:'oz',inventoryUnit:'oz'};
+    if(/gallon/.test(s)) return {amount:qty,unit:'gallon',inventoryUnit:'gallon'};
+    m = s.match(/(\d+)\s*(rolls?|count|ct|sheets|bars|pouches)\b/i); if(m) return {amount:Number(m[1])*qty,unit:'each',inventoryUnit:'each'};
+    return {amount:qty,unit:'each',inventoryUnit:'item'};
   }
   function guessCategory(name){
     const s=name.toLowerCase();
-    if(/ground beef|beef|steak/.test(s)) return 'Beef';
-    if(/chicken/.test(s)) return 'Chicken';
-    if(/pork|bacon|ham/.test(s)) return 'Pork';
-    if(/milk|cheese|butter|yogurt/.test(s)) return 'Dairy';
-    if(/egg/.test(s)) return 'Eggs';
-    if(/banana|strawberr|avocado|lettuce|apple|produce/.test(s)) return 'Produce';
-    if(/frozen|peas|fries/.test(s)) return 'Frozen';
-    if(/bread|bun|roll/.test(s)) return 'Bakery';
-    if(/corn|mushroom|fruit cocktail|can/.test(s)) return 'Canned Goods';
-    if(/sauce|pickle|condiment/.test(s)) return 'Condiments';
-    if(/cracker|cookie|snack/.test(s)) return 'Snacks';
-    if(/salt|paper|soap|detergent|softener/.test(s)) return 'Household';
+    if(/toilet paper|paper towel|napkin|tissue|charmin|bounty/.test(s)) return 'Paper Goods';
+    if(/detergent|soap|cleaner|bleach|dish|laundry|softener salt|water softener|trash bag/.test(s)) return 'Cleaning';
+    if(/shampoo|conditioner|deodorant|toothpaste|body wash/.test(s)) return 'Personal Care';
+    if(/dog food|cat food|pet food|cat litter/.test(s)) return 'Pet Supplies';
+    if(/ground beef|beef|steak/.test(s)) return 'Beef'; if(/chicken/.test(s)) return 'Chicken'; if(/pork|bacon|ham/.test(s)) return 'Pork';
+    if(/milk|cheese|butter|yogurt/.test(s)) return 'Dairy'; if(/egg/.test(s)) return 'Eggs';
+    if(/banana|strawberr|avocado|lettuce|apple|produce|onion|grape|spinach/.test(s)) return 'Produce'; if(/frozen|peas|fries/.test(s)) return 'Frozen';
+    if(/bread|bun|roll/.test(s)) return 'Bakery'; if(/corn|mushroom|fruit cocktail|can/.test(s)) return 'Canned Goods'; if(/sauce|pickle|condiment|dressing/.test(s)) return 'Condiments';
+    if(/cracker|cookie|snack|cereal|ramen|granola/.test(s)) return 'Snacks'; if(/juice|coffee|soda|water/.test(s)) return 'Beverages';
     return 'Dry Goods';
   }
   function guessLocation(name,category){
     const s=name.toLowerCase();
+    if(category==='Paper Goods') return 'Bathroom Closet';
+    if(category==='Cleaning') return 'Utility Room';
+    if(category==='Personal Care') return 'Bathroom Closet';
+    if(category==='Pet Supplies') return 'Garage Shelf';
     if(category==='Household') return 'Pantry';
     if(category==='Frozen' || /frozen|fries|peas/.test(s)) return 'Freezer';
     if(['Beef','Chicken','Pork','Fish/Seafood'].includes(category)) return 'Freezer';
-    if(['Dairy','Eggs','Produce'].includes(category) || /milk|cheese|lettuce|strawberr|avocado/.test(s)) return 'Fridge';
+    if(['Dairy','Eggs'].includes(category) || /milk|cheese|lettuce|strawberr|avocado/.test(s)) return 'Fridge';
     return 'Pantry';
   }
-  function mergeSimilar(items){
-    const map = new Map();
-    for(const item of items){
-      const key = item.name.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-      if(!map.has(key)) map.set(key,item); else {
-        const prior = map.get(key);
-        prior.quantity += item.quantity;
-        if(item.total_price && prior.total_price) prior.total_price = Number(prior.total_price) + Number(item.total_price);
-      }
-    }
-    return [...map.values()];
-  }
-  function normalizeScanItem(x){
-    const name = x.name || x.item_name || '';
-    const category = x.category || guessCategory(name);
-    return {name,quantity:Number(x.quantity)||1,unit:x.unit||'item',category,location:x.location||guessLocation(name,category),total_price:x.total_price||'',amount:Number(x.weight||x.amount||x.quantity)||1,amount_unit:x.weight_unit||x.amount_unit||x.unit||'each'};
-  }
+  function mergeSimilar(items){ const map=new Map(); for(const item of items){const key=item.name.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); if(!map.has(key)) map.set(key,item); else { const p=map.get(key); p.quantity+=item.quantity; if(item.total_price&&p.total_price) p.total_price=Number(p.total_price)+Number(item.total_price); }} return [...map.values()]; }
+  function normalizeScanItem(x){ const name=x.name||x.item_name||''; const category=x.category||guessCategory(name); return {name,quantity:Number(x.quantity)||1,unit:x.unit||'item',category,location:x.location||guessLocation(name,category),total_price:x.total_price||'',amount:Number(x.weight||x.amount||x.quantity)||1,amount_unit:x.weight_unit||x.amount_unit||x.unit||'each'}; }
 
   function renderReceiptReview(rows){
     const review = $('receiptReview');
-    if(!rows.length){
-      $('receiptStatus').textContent = 'No likely receipt items found. Try copying the Walmart order item text into the box.';
-      $('receiptSaveBtn').classList.add('hidden');
-      $('receiptSummary').classList.add('hidden');
-      review.innerHTML = '';
-      return;
-    }
+    if(!rows.length){ $('receiptStatus').textContent='No likely receipt items found. Try copying the Walmart order item text into the box.'; $('receiptSaveBtn').classList.add('hidden'); $('receiptSummary').classList.add('hidden'); review.innerHTML=''; return; }
     const total = rows.reduce((n,r)=>n+(Number(r.total_price)||0),0);
     $('receiptSummary').classList.remove('hidden');
     $('receiptSummary').innerHTML = `<div><small>Items found</small><strong>${rows.length}</strong></div><div><small>Price data</small><strong>${total ? '$'+total.toFixed(2) : 'Review'}</strong></div><div><small>Store</small><strong>${esc($('receiptStore').value)}</strong></div>`;
-    review.innerHTML = rows.map((r,i)=>`
-      <div class="receipt-row" data-i="${i}">
-        <input class="receipt-save" type="checkbox" ${r.category==='Household'?'':'checked'} aria-label="Save ${esc(r.name)}">
-        <input class="receipt-name" value="${esc(r.name)}">
-        <input class="receipt-qty" type="number" step="0.25" value="${esc(r.quantity)}" title="Quantity">
-        <select class="receipt-category">${opts(categories,r.category)}</select>
-        <select class="receipt-location">${opts(locations,r.location)}</select>
-        <input class="receipt-price" type="number" step="0.01" value="${esc(r.total_price)}" placeholder="total $">
-        <input class="receipt-amount" type="number" step="0.01" value="${esc(r.amount)}" placeholder="amount">
-        <select class="receipt-amount-unit">${opts(units,r.amount_unit)}</select>
-      </div>`).join('');
-    $('receiptStatus').textContent = `Found ${rows.length} likely item(s). Uncheck anything you do not want in pantry inventory.`;
+    review.innerHTML = rows.map((r,i)=>`<div class="receipt-row" data-i="${i}"><input class="receipt-save" type="checkbox" checked aria-label="Save ${esc(r.name)}"><input class="receipt-name" value="${esc(r.name)}"><input class="receipt-qty" type="number" step="0.25" value="${esc(r.quantity)}" title="Quantity"><select class="receipt-category">${opts(categories,r.category)}</select><select class="receipt-location">${opts(locations,r.location)}</select><input class="receipt-price" type="number" step="0.01" value="${esc(r.total_price)}" placeholder="total $"><input class="receipt-amount" type="number" step="0.01" value="${esc(r.amount)}" placeholder="amount"><select class="receipt-amount-unit">${opts(units,r.amount_unit)}</select></div>`).join('');
+    $('receiptStatus').textContent = `Found ${rows.length} likely item(s), including household supplies. Uncheck anything you do not want in inventory.`;
     $('receiptSaveBtn').classList.remove('hidden');
   }
 
@@ -218,7 +164,7 @@
     const rows = [...document.querySelectorAll('.receipt-row')].filter(row=>row.querySelector('.receipt-save').checked).map(row=>({
       name: row.querySelector('.receipt-name').value.trim(),
       quantity: Number(row.querySelector('.receipt-qty').value)||1,
-      unit: row.querySelector('.receipt-amount-unit').value==='lb' ? 'lbs' : 'item',
+      unit: ['lb','lbs'].includes(row.querySelector('.receipt-amount-unit').value) ? 'lbs' : (row.querySelector('.receipt-amount-unit').value || 'item'),
       category: row.querySelector('.receipt-category').value,
       location: row.querySelector('.receipt-location').value,
       total_price: Number(row.querySelector('.receipt-price').value)||null,
@@ -228,42 +174,17 @@
     if(!rows.length){ $('receiptStatus').textContent='No checked items to save.'; return; }
     $('receiptStatus').textContent = 'Saving receipt items...';
     const db = window.supabase.createClient(window.PANTRYPAL_CONFIG.SUPABASE_URL, window.PANTRYPAL_CONFIG.SUPABASE_ANON_KEY);
-    const inventoryRows = rows.filter(r=>r.category !== 'Household').map(r=>({name:r.name,category:r.category,location:r.location,quantity:r.quantity,unit:r.unit,best_by:null,notes:`Imported from ${$('receiptStore').value} receipt on ${$('receiptDate').value}`,low_stock:false}));
-    if(inventoryRows.length){
-      const {error} = await db.from('pantry_items').insert(inventoryRows);
-      if(error){ $('receiptStatus').textContent = 'Inventory save error: '+error.message; return; }
-    }
+    const inventoryRows = rows.map(r=>({name:r.name,category:r.category,location:r.location,quantity:r.quantity,unit:r.unit,best_by:null,notes:`Imported from ${$('receiptStore').value} receipt on ${$('receiptDate').value}`,low_stock:false}));
+    if(inventoryRows.length){ const {error} = await db.from('pantry_items').insert(inventoryRows); if(error){ $('receiptStatus').textContent = 'Inventory save error: '+error.message; return; } }
     const history = JSON.parse(localStorage.getItem('pantrypal_price_history')||'[]');
     const store = $('receiptStore').value;
     const date = $('receiptDate').value || new Date().toISOString().slice(0,10);
-    rows.forEach(r=>{
-      if(!r.total_price) return;
-      const unitPrice = r.amount ? Number(r.total_price)/Number(r.amount) : Number(r.total_price);
-      history.push({normalized_name:normalizeName(r.name),item_name:r.name,store_name:store,date,amount:r.amount,unit:r.amount_unit,total_price:r.total_price,unit_price:unitPrice,source:'receipt import'});
-    });
+    rows.forEach(r=>{ if(!r.total_price) return; const unitPrice = r.amount ? Number(r.total_price)/Number(r.amount) : Number(r.total_price); history.push({normalized_name:normalizeName(r.name),item_name:r.name,store_name:store,date,amount:r.amount,unit:r.amount_unit,total_price:r.total_price,unit_price:unitPrice,source:'receipt import'}); });
     localStorage.setItem('pantrypal_price_history',JSON.stringify(history));
-    $('receiptStatus').textContent = `Saved ${inventoryRows.length} food item(s) to inventory and ${rows.filter(r=>r.total_price).length} price record(s). Refresh to see imported items in Pantry.`;
+    $('receiptStatus').textContent = `Saved ${inventoryRows.length} item(s) to inventory and ${rows.filter(r=>r.total_price).length} price record(s). Refresh to see imported items in Pantry.`;
   }
 
-  function normalizeName(name){
-    const s = String(name||'').toLowerCase();
-    if(s.includes('chicken')) return 'chicken breast';
-    if(s.includes('ground beef') || s.includes('beef')) return 'ground beef';
-    if(s.includes('milk')) return 'milk';
-    if(s.includes('egg')) return 'eggs';
-    if(s.includes('cheese')) return 'cheese';
-    if(s.includes('bread')) return 'bread';
-    return s.replace(/great value|freshness guaranteed|fresh|\d+\s*(oz|lb|count|ct)/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-  }
-  function imageToBase64(file){
-    if(window.imageToJpegBase64) return window.imageToJpegBase64(file,1280,0.82);
-    return new Promise((resolve,reject)=>{
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result).split(',')[1]);
-      reader.onerror = () => reject(new Error('Could not read image'));
-      reader.readAsDataURL(file);
-    });
-  }
-
+  function normalizeName(name){ const s=String(name||'').toLowerCase(); if(s.includes('toilet paper')) return 'toilet paper'; if(s.includes('paper towel')) return 'paper towels'; if(s.includes('chicken')) return 'chicken breast'; if(s.includes('ground beef')||s.includes('beef')) return 'ground beef'; if(s.includes('milk')) return 'milk'; if(s.includes('egg')) return 'eggs'; if(s.includes('cheese')) return 'cheese'; if(s.includes('bread')) return 'bread'; return s.replace(/great value|freshness guaranteed|fresh|\d+\s*(oz|lb|count|ct)/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function imageToBase64(file){ if(window.imageToJpegBase64) return window.imageToJpegBase64(file,1280,0.82); return new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(String(reader.result).split(',')[1]); reader.onerror=()=>reject(new Error('Could not read image')); reader.readAsDataURL(file); }); }
   document.addEventListener('DOMContentLoaded', addReceiptCard);
 })();
