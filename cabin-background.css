@@ -1,0 +1,19 @@
+/* Real cabin/photo background override.
+   This loads after styles.css so it replaces the fake gradient/wood-stripe body background. */
+body{
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(circle at 8% 18%, rgba(255,184,78,.18), transparent 12%),
+    radial-gradient(circle at 95% 72%, rgba(255,128,38,.20), transparent 16%),
+    linear-gradient(90deg, rgba(10,5,2,.78), rgba(10,5,2,.20) 14%, rgba(10,5,2,.20) 86%, rgba(10,5,2,.78)),
+    linear-gradient(180deg, rgba(6,3,1,.30), rgba(6,3,1,.55)),
+    url("assets/bg/cabin-bg.jpg?v=1");
+  background-size: auto, auto, auto, auto, cover;
+  background-position: center, center, center, center, center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+body:before{
+  display:none !important;
+}
