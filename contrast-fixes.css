@@ -1,0 +1,116 @@
+/* PantryPal contrast/readability overrides */
+:root{
+  --readable-ink:#111812;
+  --readable-muted:#3f3a30;
+  --readable-soft:#514633;
+}
+
+/* Light cards and workspaces should use dark readable text */
+.cream-workspace,
+.ui-card,
+.page-card,
+.receipt-import-card,
+.drawer-card,
+.left-value-card,
+.dinner-feature,
+.item,
+.recipe,
+.scan-card,
+.grocery-item,
+.staple-card,
+.store-card,
+.value-row,
+.health-row,
+.stock-row,
+.store-row,
+.purchase-row,
+.preference-box,
+.receipt-row,
+.receipt-summary div,
+input,
+select,
+textarea{
+  color:var(--readable-ink) !important;
+}
+
+.cream-workspace .muted,
+.ui-card .muted,
+.page-card .muted,
+.receipt-import-card .muted,
+.drawer-card .muted,
+.left-value-card .muted,
+.dinner-feature .muted,
+.item p,
+.recipe p,
+.grocery-item span,
+.status-text,
+.hint,
+.receipt-status,
+.receipt-import-card p,
+.receipt-import-card label,
+.page-card p,
+.ui-card p,
+.drawer-card p{
+  color:var(--readable-muted) !important;
+}
+
+.cream-workspace h2,
+.cream-workspace h3,
+.ui-card h2,
+.ui-card h3,
+.page-card h2,
+.page-card h3,
+.drawer-card h2,
+.drawer-card h3,
+.receipt-import-card h2,
+.receipt-import-card h3,
+.item h3,
+.recipe h3,
+.value-total,
+.receipt-name,
+.receipt-summary strong{
+  color:#0f1c14 !important;
+}
+
+/* Keep intentionally dark sections light */
+.app-header,
+.app-header *,
+.tabbar,
+.tabbar *,
+.home-command-card,
+.home-command-card *,
+.shopping-card,
+.shopping-card *,
+.page-sidebar,
+.page-sidebar *,
+footer,
+footer *{
+  color:#fff3d7 !important;
+}
+
+/* But badges/chips on dark panels still need dark text */
+.status-pill,
+.chip,
+.date-pill,
+.shopping-card .chip,
+.home-command-card .date-pill,
+.app-header .status-pill{
+  color:#102b20 !important;
+}
+
+button,
+button *{
+  color:#fff3d7 !important;
+}
+button.secondary,
+button.secondary *,
+.receipt-import-card button.secondary,
+.receipt-import-card button.secondary *{
+  color:#111812 !important;
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:#6a6255 !important;
+  opacity:1;
+}
