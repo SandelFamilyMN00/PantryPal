@@ -3,58 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>PantryPal · Approved Landing</title>
+  <title>PantryPal · Functional Render Rebuild</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main class="site-shell">
-    <section class="tab-panel approved-panel active" data-panel="home">
-      <div class="approved-stage" aria-label="Approved PantryPal landing page">
-        <img class="approved-landing-img" src="assets/approved-landing.png?v=approved-landing-1" alt="Approved PantryPal landing page rendering">
-        <button class="tab-button render-hotspot hot-home active" data-tab="home" type="button" aria-label="Home">Home</button>
-        <button class="tab-button render-hotspot hot-pantry" data-tab="inventory" type="button" aria-label="Pantry">Pantry</button>
-        <button class="tab-button render-hotspot hot-recipes" data-tab="recipes" type="button" aria-label="Recipes">Recipes</button>
-        <button class="tab-button render-hotspot hot-addscan" data-tab="addscan" type="button" aria-label="Add or Scan">Add / Scan</button>
-        <button class="tab-button render-hotspot hot-grocery" data-tab="grocery" type="button" aria-label="Grocery">Grocery</button>
-        <button class="tab-button render-hotspot hot-more" data-tab="more" type="button" aria-label="More">More</button>
-
-        <div class="data-wiring" aria-hidden="true">
-          <p id="status">Connecting...</p>
-          <span id="pantryScore">0</span><span id="pantryScorePill">0%</span><p id="pantryScoreSummary"></p>
-          <strong id="homeInventoryStat"></strong><strong id="homeMealsStat"></strong><strong id="homeValueStat"></strong><strong id="homeLowStat"></strong>
-          <div id="tonightDinner"></div><div id="pantryValue"></div><div id="pantryHealth"></div><div id="staplesGlance"></div><div id="storeDealsPreview"></div><div id="criticalStaples"></div>
+  <main class="pantrypal-app">
+    <header class="app-header">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">♜</div>
+        <div>
+          <h1>PantryPal</h1>
+          <p class="tagline">Rush City Edition · Mild family meals, cabin-ready staples, smarter store runs.</p>
         </div>
       </div>
+      <div class="header-actions">
+        <p id="status" class="status-pill">Connecting...</p>
+        <button class="icon-button" type="button" aria-label="Search">⌕</button>
+        <button class="icon-button" type="button" aria-label="Settings">⚙</button>
+      </div>
+    </header>
+
+    <nav class="tabbar" aria-label="PantryPal sections">
+      <button class="tab-button active" data-tab="home" type="button"><span>⌂</span> Home</button>
+      <button class="tab-button" data-tab="inventory" type="button"><span>▤</span> Pantry</button>
+      <button class="tab-button" data-tab="recipes" type="button"><span>♨</span> Recipes</button>
+      <button class="tab-button" data-tab="addscan" type="button"><span>＋</span> Add / Scan</button>
+      <button class="tab-button" data-tab="grocery" type="button"><span>🛒</span> Grocery</button>
+      <button class="tab-button" data-tab="more" type="button"><span>•••</span> More</button>
+    </nav>
+
+    <section class="tab-panel active home-panel" data-panel="home">
+      <section class="mock-dashboard">
+        <aside class="home-command-card">
+          <div class="home-command-top">
+            <div>
+              <p class="eyebrow">Home</p>
+              <h2>Cabin stock check.</h2>
+              <p>Food on hand, dinner options, and whether your next pickup run is worth making.</p>
+            </div>
+            <span class="date-pill">Today</span>
+          </div>
+          <section class="score-metrics-card">
+            <div class="score-ring"><span id="pantryScore">0</span><small id="pantryScorePill">0%</small></div>
+            <div class="score-copy"><strong>Pantry Score</strong><p id="pantryScoreSummary">Loading pantry status.</p></div>
+            <div class="mini-metrics">
+              <article><small>Inventory</small><strong id="homeInventoryStat">—</strong></article>
+              <article><small>Meals</small><strong id="homeMealsStat">—</strong></article>
+              <article><small>Value</small><strong id="homeValueStat">—</strong></article>
+              <article><small>Low</small><strong id="homeLowStat">—</strong></article>
+            </div>
+          </section>
+          <article class="dinner-feature"><div class="food-photo" aria-hidden="true"></div><p class="eyebrow">Tonight's Dinner</p><div id="tonightDinner"></div></article>
+          <article class="left-value-card"><p class="eyebrow">Pantry Value</p><div id="pantryValue" class="value-list"></div></article>
+        </aside>
+
+        <section class="cream-workspace">
+          <header class="workspace-head">
+            <div><p class="eyebrow">Dashboard</p><h2>Family Pantry Intelligence</h2></div>
+            <div class="workspace-pills"><span>Live</span><span>Pickup-ready</span><span>Mild meals</span></div>
+          </header>
+          <div class="workspace-grid">
+            <article class="ui-card wide-card"><div class="card-head"><div><p class="eyebrow">Food Categories</p><h3>Stock Balance</h3></div><span class="chip">Health</span></div><div id="pantryHealth" class="health-list"></div></article>
+            <article class="ui-card"><div class="card-head"><div><p class="eyebrow">Staples at a Glance</p><h3>Core Items</h3></div><span class="chip">Targets</span></div><div id="staplesGlance" class="staples-grid mini-staples"></div></article>
+            <article class="ui-card shopping-card"><div class="card-head"><div><p class="eyebrow">Store Run</p><h3>Smart Shopping</h3></div><span class="chip">Compare</span></div><div class="shopping-summary"><div><small>Best guess</small><strong>Walmart + ALDI check</strong></div><div><small>Trip logic</small><strong>Only split if meat saves $8+</strong></div></div><div id="storeDealsPreview" class="store-preview"></div></article>
+            <article class="ui-card"><div class="card-head"><div><p class="eyebrow">Critical Low Staples</p><h3>Buy Soon</h3></div><span class="chip">Priority</span></div><div id="criticalStaples" class="critical-list"></div></article>
+          </div>
+        </section>
+      </section>
     </section>
 
-    <section class="tab-panel app-page" data-panel="inventory">
-      <nav class="utility-nav" aria-label="PantryPal sections"><button class="tab-button" data-tab="home" type="button">⌂ Home</button><button class="tab-button" data-tab="inventory" type="button">▤ Pantry</button><button class="tab-button" data-tab="recipes" type="button">♨ Recipes</button><button class="tab-button" data-tab="addscan" type="button">＋ Add / Scan</button><button class="tab-button" data-tab="grocery" type="button">🛒 Grocery</button><button class="tab-button" data-tab="more" type="button">••• More</button></nav>
-      <section class="page-shell"><aside class="page-sidebar"><p class="eyebrow">Pantry Score</p><div class="score-ring small-score"><span>87</span><small>Ready</small></div><div class="sidebar-list"><span>Pantry</span><span>Fridge</span><span>Freezer</span><span>Low Stock</span></div></aside><section class="page-card inventory-card"><div class="page-head"><div><p class="eyebrow">Inventory</p><h2>Your Pantry</h2><p class="muted">Search, edit, use, and restock your pantry from one clean table.</p></div><span id="inventoryCount" class="status-pill">0 items</span></div><input id="search" class="search-input" placeholder="Search pantry, fridge, freezer, notes, or unit"><div id="inventory" class="inventory-list"></div></section></section>
-    </section>
+    <section class="tab-panel" data-panel="inventory"><section class="page-shell"><aside class="page-sidebar"><p class="eyebrow">Pantry Score</p><div class="score-ring small-score"><span>87</span><small>Ready</small></div><div class="sidebar-list"><span>Pantry</span><span>Fridge</span><span>Freezer</span><span>Low Stock</span></div></aside><section class="page-card inventory-card"><div class="page-head"><div><p class="eyebrow">Inventory</p><h2>Your Pantry</h2><p class="muted">Search, edit, use, and restock your pantry from one clean table.</p></div><span id="inventoryCount" class="status-pill">0 items</span></div><input id="search" class="search-input" placeholder="Search pantry, fridge, freezer, notes, or unit"><div id="inventory" class="inventory-list"></div></section></section></section>
 
-    <section class="tab-panel app-page" data-panel="recipes">
-      <nav class="utility-nav" aria-label="PantryPal sections"><button class="tab-button" data-tab="home" type="button">⌂ Home</button><button class="tab-button" data-tab="inventory" type="button">▤ Pantry</button><button class="tab-button" data-tab="recipes" type="button">♨ Recipes</button><button class="tab-button" data-tab="addscan" type="button">＋ Add / Scan</button><button class="tab-button" data-tab="grocery" type="button">🛒 Grocery</button><button class="tab-button" data-tab="more" type="button">••• More</button></nav>
-      <section class="page-card recipe-card"><div class="page-head"><div><p class="eyebrow">Meals</p><h2>Recipe Ideas</h2><p class="muted">Default is mild, kid-friendly, and not spicy.</p></div></div><div class="preference-box"><h3>Recipe Preferences</h3><div class="grid"><label>Spice level<select id="spiceLevel"><option value="mild">Mild / not spicy</option><option value="medium">Medium</option><option value="hot">Hot</option></select></label><label>Recipe style<select id="recipeStyle"><option value="mild family friendly quick dinners">Mild family-friendly quick dinners</option><option value="kid friendly meals">Kid-friendly meals</option><option value="high protein mild meals">High-protein mild meals</option><option value="cheap pantry meals">Cheap pantry meals</option><option value="healthy simple mild meals">Healthy simple mild meals</option></select></label></div><label>Disliked or avoided ingredients<textarea id="dislikedIngredients" placeholder="spicy foods, hot sauce, jalapeños, cayenne-heavy recipes"></textarea></label><label>Favorite family meals<textarea id="favoriteMeals" placeholder="mild tacos, spaghetti, burgers, chicken rice, breakfast burritos"></textarea></label><label>Dietary notes<textarea id="dietaryNotes" placeholder="simple meals, kid-friendly, no spicy heat"></textarea></label><button id="savePreferencesBtn" type="button">Save Preferences</button><p id="preferenceStatus" class="status-text"></p></div><div class="two-col"><button id="starterRecipeBtn" type="button" class="secondary">Show Built-in Recipes</button><button id="recipeBtn" type="button">Get AI Recipe Ideas</button></div><p id="recipeStatus" class="status-text"></p><div id="recipeIdeas" class="recipe-list"></div></section>
-    </section>
+    <section class="tab-panel" data-panel="recipes"><section class="page-card recipe-card"><div class="page-head"><div><p class="eyebrow">Meals</p><h2>Recipe Ideas</h2><p class="muted">Default is mild, kid-friendly, and not spicy.</p></div></div><div class="preference-box"><h3>Recipe Preferences</h3><div class="grid"><label>Spice level<select id="spiceLevel"><option value="mild">Mild / not spicy</option><option value="medium">Medium</option><option value="hot">Hot</option></select></label><label>Recipe style<select id="recipeStyle"><option value="mild family friendly quick dinners">Mild family-friendly quick dinners</option><option value="kid friendly meals">Kid-friendly meals</option><option value="high protein mild meals">High-protein mild meals</option><option value="cheap pantry meals">Cheap pantry meals</option><option value="healthy simple mild meals">Healthy simple mild meals</option></select></label></div><label>Disliked or avoided ingredients<textarea id="dislikedIngredients" placeholder="spicy foods, hot sauce, jalapeños, cayenne-heavy recipes"></textarea></label><label>Favorite family meals<textarea id="favoriteMeals" placeholder="mild tacos, spaghetti, burgers, chicken rice, breakfast burritos"></textarea></label><label>Dietary notes<textarea id="dietaryNotes" placeholder="simple meals, kid-friendly, no spicy heat"></textarea></label><button id="savePreferencesBtn" type="button">Save Preferences</button><p id="preferenceStatus" class="status-text"></p></div><div class="two-col"><button id="starterRecipeBtn" type="button" class="secondary">Show Built-in Recipes</button><button id="recipeBtn" type="button">Get AI Recipe Ideas</button></div><p id="recipeStatus" class="status-text"></p><div id="recipeIdeas" class="recipe-list"></div></section></section>
 
-    <section class="tab-panel app-page" data-panel="addscan">
-      <nav class="utility-nav" aria-label="PantryPal sections"><button class="tab-button" data-tab="home" type="button">⌂ Home</button><button class="tab-button" data-tab="inventory" type="button">▤ Pantry</button><button class="tab-button" data-tab="recipes" type="button">♨ Recipes</button><button class="tab-button" data-tab="addscan" type="button">＋ Add / Scan</button><button class="tab-button" data-tab="grocery" type="button">🛒 Grocery</button><button class="tab-button" data-tab="more" type="button">••• More</button></nav>
-      <section class="page-grid"><section class="page-card scan"><div class="page-head"><div><p class="eyebrow">Scanner</p><h2>Scan Food</h2><p class="muted">Readable labels and close photos work best.</p></div><select id="scanLocation" class="small-select"></select></div><select id="scanMode"><option value="general">General food scan</option><option value="meat_label">Meat / store label scan</option></select><p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p><div class="photo-actions two-col"><button id="takePhotoBtn" type="button">Take Photo</button><button id="uploadPhotoBtn" type="button" class="secondary">Upload Existing Photo</button></div><input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"><input id="uploadInput" type="file" accept="image/*" class="hidden"><img id="preview" class="preview hidden" alt="Preview"><button id="scanBtn">Scan Photo</button><p id="scanStatus" class="status-text"></p><div id="scanResults"></div><button id="saveScanBtn" class="hidden">Save Selected Items</button></section><section class="page-card"><div class="page-head"><div><p class="eyebrow">Stock Entry</p><h2>Add Item</h2></div></div><form id="itemForm" class="tight-form"><input id="name" placeholder="Item name, e.g. Milk" required><div class="grid"><select id="category"></select><select id="location"></select><input id="quantity" type="number" step="0.25" value="1"><select id="unit"></select></div><input id="bestBy" type="date"><textarea id="notes" placeholder="Notes"></textarea><label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label><button>Add to Pantry</button></form></section></section>
-    </section>
+    <section class="tab-panel" data-panel="addscan"><section class="page-grid"><section class="page-card scan"><div class="page-head"><div><p class="eyebrow">Scanner</p><h2>Scan Food</h2><p class="muted">Readable labels and close photos work best.</p></div><select id="scanLocation" class="small-select"></select></div><select id="scanMode"><option value="general">General food scan</option><option value="meat_label">Meat / store label scan</option></select><p id="scanHint" class="hint">For best results, keep labels readable and fill the frame.</p><div class="photo-actions two-col"><button id="takePhotoBtn" type="button">Take Photo</button><button id="uploadPhotoBtn" type="button" class="secondary">Upload Existing Photo</button></div><input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"><input id="uploadInput" type="file" accept="image/*" class="hidden"><img id="preview" class="preview hidden" alt="Preview"><button id="scanBtn">Scan Photo</button><p id="scanStatus" class="status-text"></p><div id="scanResults"></div><button id="saveScanBtn" class="hidden">Save Selected Items</button></section><section class="page-card"><div class="page-head"><div><p class="eyebrow">Stock Entry</p><h2>Add Item</h2></div></div><form id="itemForm" class="tight-form"><input id="name" placeholder="Item name, e.g. Milk" required><div class="grid"><select id="category"></select><select id="location"></select><input id="quantity" type="number" step="0.25" value="1"><select id="unit"></select></div><input id="bestBy" type="date"><textarea id="notes" placeholder="Notes"></textarea><label class="checkrow"><input id="lowStock" type="checkbox"> Low stock</label><button>Add to Pantry</button></form></section></section></section>
 
-    <section class="tab-panel app-page" data-panel="grocery">
-      <nav class="utility-nav" aria-label="PantryPal sections"><button class="tab-button" data-tab="home" type="button">⌂ Home</button><button class="tab-button" data-tab="inventory" type="button">▤ Pantry</button><button class="tab-button" data-tab="recipes" type="button">♨ Recipes</button><button class="tab-button" data-tab="addscan" type="button">＋ Add / Scan</button><button class="tab-button" data-tab="grocery" type="button">🛒 Grocery</button><button class="tab-button" data-tab="more" type="button">••• More</button></nav>
-      <section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList" class="grocery-list"></div></section>
-    </section>
+    <section class="tab-panel" data-panel="grocery"><section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList" class="grocery-list"></div></section></section>
 
-    <section class="tab-panel app-page" data-panel="more">
-      <nav class="utility-nav" aria-label="PantryPal sections"><button class="tab-button" data-tab="home" type="button">⌂ Home</button><button class="tab-button" data-tab="inventory" type="button">▤ Pantry</button><button class="tab-button" data-tab="recipes" type="button">♨ Recipes</button><button class="tab-button" data-tab="addscan" type="button">＋ Add / Scan</button><button class="tab-button" data-tab="grocery" type="button">🛒 Grocery</button><button class="tab-button" data-tab="more" type="button">••• More</button></nav>
-      <section class="page-grid"><section class="page-card"><div class="page-head"><div><p class="eyebrow">Settings</p><h2>Rush City Edition</h2><p class="muted">Staple targets are configurable and stored on this device.</p></div><button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button></div><div id="stapleTargetEditor" class="target-editor"></div></section></section>
-    </section>
+    <section class="tab-panel" data-panel="more"><section class="page-grid"><section class="page-card"><div class="page-head"><div><p class="eyebrow">Settings</p><h2>Rush City Edition</h2><p class="muted">Staple targets are configurable and stored on this device.</p></div><button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button></div><div id="stapleTargetEditor" class="target-editor"></div></section></section></section>
 
     <div id="itemDrawerBackdrop" class="drawer-backdrop hidden" onclick="closeItemDrawer()" aria-hidden="true"></div>
     <aside id="itemDrawer" class="item-drawer" aria-hidden="true" aria-label="Item details and price history"><div class="drawer-topbar"><div><p class="eyebrow">Item Intelligence</p><h2 id="drawerItemName">Item Details</h2><p id="drawerItemSub" class="muted">Inventory, purchase history, and store comparison.</p></div><button class="icon-button close-drawer" type="button" onclick="closeItemDrawer()" aria-label="Close item details">×</button></div><div class="drawer-grid"><section class="drawer-card current-stock-card"><p class="eyebrow">Current Stock</p><div id="drawerCurrentStock" class="stock-snapshot"></div></section><section class="drawer-card buy-verdict-card"><p class="eyebrow">Buy Recommendation</p><div id="drawerBuyVerdict"></div></section><section class="drawer-card chart-card"><div class="drawer-section-head"><div><p class="eyebrow">Price History</p><h3 id="drawerChartTitle">$/unit over time</h3></div><span id="drawerPriceBasis" class="chip">price book</span></div><div id="drawerPriceChart" class="price-chart"></div></section><section class="drawer-card store-compare-card"><p class="eyebrow">Store Comparison</p><div id="drawerStoreCompare" class="store-compare-list"></div></section><section class="drawer-card purchase-log-card"><p class="eyebrow">Purchase Log</p><div id="drawerPurchaseLog" class="purchase-log"></div></section><section class="drawer-card add-price-card"><p class="eyebrow">Add Price Point</p><div class="price-entry-grid"><label>Store<select id="priceStore"><option>Walmart Pine City</option><option>ALDI Pine City</option><option>Walmart Cambridge</option><option>ALDI Cambridge</option><option>Costco Coon Rapids</option><option>Coborn’s Pine City</option></select></label><label>Date<input id="priceDate" type="date"></label><label>Total price<input id="priceTotal" type="number" step="0.01" placeholder="23.02"></label><label>Amount / weight<input id="priceAmount" type="number" step="0.01" placeholder="9.28"></label><label>Unit<select id="priceUnit"><option>lb</option><option>each</option><option>gallon</option><option>oz</option><option>pack</option></select></label><button id="savePriceRecordBtn" type="button">Save Price Point</button></div><p class="muted">Use this for receipt values until Walmart/ALDI receipt import is wired in.</p></section></div></aside>
+
+    <footer><strong>PantryPal · Functional Render Rebuild</strong><span>Know what you have · Buy what you need</span></footer>
   </main>
   <script src="config.js"></script>
   <script src="app.js"></script>
