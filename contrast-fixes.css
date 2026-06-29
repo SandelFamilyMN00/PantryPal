@@ -1,14 +1,20 @@
-/* PantryPal contrast/readability overrides */
+/* PantryPal contrast/readability overrides v2
+   Goal: every text element must contrast with the panel it sits on. */
 :root{
-  --readable-ink:#111812;
-  --readable-muted:#3f3a30;
-  --readable-soft:#514633;
+  --readable-ink:#0e1711;
+  --readable-muted:#332f28;
+  --readable-soft:#4b4235;
+  --readable-cream:#fff6df;
+  --readable-cream-muted:#eadfc6;
 }
 
-/* Light cards and workspaces should use dark readable text */
-.cream-workspace,
-.ui-card,
+/* Default: make normal text dark and readable. */
+body,
+.pantrypal-app,
+.tab-panel,
 .page-card,
+.ui-card,
+.cream-workspace,
 .receipt-import-card,
 .drawer-card,
 .left-value-card,
@@ -27,52 +33,114 @@
 .preference-box,
 .receipt-row,
 .receipt-summary div,
-input,
-select,
-textarea{
+.card-head,
+.page-head,
+.section-head,
+.workspace-head,
+.drawer-section-head,
+.value-list,
+.health-list,
+.staples-grid,
+.critical-list,
+.store-preview,
+.inventory-list,
+.recipe-list,
+.grocery-list,
+.target-editor,
+.manual-grocery,
+.price-entry-grid,
+.stock-snapshot,
+.store-compare-list,
+.purchase-log{
   color:var(--readable-ink) !important;
 }
 
-.cream-workspace .muted,
-.ui-card .muted,
-.page-card .muted,
-.receipt-import-card .muted,
-.drawer-card .muted,
-.left-value-card .muted,
-.dinner-feature .muted,
-.item p,
-.recipe p,
-.grocery-item span,
+/* Headings and strong values on light backgrounds. */
+.page-card h1,.page-card h2,.page-card h3,.page-card h4,
+.ui-card h1,.ui-card h2,.ui-card h3,.ui-card h4,
+.cream-workspace h1,.cream-workspace h2,.cream-workspace h3,.cream-workspace h4,
+.receipt-import-card h1,.receipt-import-card h2,.receipt-import-card h3,.receipt-import-card h4,
+.drawer-card h1,.drawer-card h2,.drawer-card h3,.drawer-card h4,
+.left-value-card h1,.left-value-card h2,.left-value-card h3,.left-value-card h4,
+.dinner-feature h1,.dinner-feature h2,.dinner-feature h3,.dinner-feature h4,
+.item h1,.item h2,.item h3,.item h4,
+.recipe h1,.recipe h2,.recipe h3,.recipe h4,
+.scan-card h1,.scan-card h2,.scan-card h3,.scan-card h4,
+.grocery-item h1,.grocery-item h2,.grocery-item h3,.grocery-item h4,
+.staple-card h1,.staple-card h2,.staple-card h3,.staple-card h4,
+.store-card h1,.store-card h2,.store-card h3,.store-card h4,
+.value-row strong,
+.health-row strong,
+.stock-row strong,
+.store-row strong,
+.purchase-row strong,
+.receipt-row strong,
+.receipt-summary strong,
+.value-total,
+.receipt-name,
+.metric-card strong,
+.mini-staples strong{
+  color:#08130c !important;
+}
+
+/* Paragraphs, helper text, item notes, labels, table/list details on light backgrounds. */
+.page-card p,.page-card small,.page-card label,.page-card span,.page-card li,
+.ui-card p,.ui-card small,.ui-card label,.ui-card span,.ui-card li,
+.cream-workspace p,.cream-workspace small,.cream-workspace label,.cream-workspace span,.cream-workspace li,
+.receipt-import-card p,.receipt-import-card small,.receipt-import-card label,.receipt-import-card span,.receipt-import-card li,
+.drawer-card p,.drawer-card small,.drawer-card label,.drawer-card span,.drawer-card li,
+.left-value-card p,.left-value-card small,.left-value-card label,.left-value-card span,.left-value-card li,
+.dinner-feature p,.dinner-feature small,.dinner-feature label,.dinner-feature span,.dinner-feature li,
+.item p,.item small,.item label,.item span,.item li,
+.recipe p,.recipe small,.recipe label,.recipe span,.recipe li,
+.scan-card p,.scan-card small,.scan-card label,.scan-card span,.scan-card li,
+.grocery-item p,.grocery-item small,.grocery-item label,.grocery-item span,.grocery-item li,
+.staple-card p,.staple-card small,.staple-card label,.staple-card span,.staple-card li,
+.store-card p,.store-card small,.store-card label,.store-card span,.store-card li,
+.muted,
 .status-text,
 .hint,
-.receipt-status,
-.receipt-import-card p,
-.receipt-import-card label,
-.page-card p,
-.ui-card p,
-.drawer-card p{
+.meta,
+.notes,
+.receipt-status{
   color:var(--readable-muted) !important;
 }
 
-.cream-workspace h2,
-.cream-workspace h3,
-.ui-card h2,
-.ui-card h3,
-.page-card h2,
-.page-card h3,
-.drawer-card h2,
-.drawer-card h3,
-.receipt-import-card h2,
-.receipt-import-card h3,
-.item h3,
-.recipe h3,
-.value-total,
-.receipt-name,
-.receipt-summary strong{
-  color:#0f1c14 !important;
+/* Eyebrows on light backgrounds: still accent, but dark enough to read. */
+.page-card .eyebrow,
+.ui-card .eyebrow,
+.cream-workspace .eyebrow,
+.receipt-import-card .eyebrow,
+.drawer-card .eyebrow,
+.left-value-card .eyebrow,
+.dinner-feature .eyebrow,
+.item .eyebrow,
+.recipe .eyebrow,
+.scan-card .eyebrow,
+.grocery-item .eyebrow,
+.staple-card .eyebrow,
+.store-card .eyebrow{
+  color:#6b3f1f !important;
 }
 
-/* Keep intentionally dark sections light */
+/* Inputs must be readable regardless of inherited panel color. */
+input,select,textarea,
+.receipt-row input,
+.receipt-row select,
+.price-entry-grid input,
+.price-entry-grid select,
+.search-input{
+  background:#fffdf6 !important;
+  color:#08130c !important;
+  border-color:#b99f70 !important;
+}
+input::placeholder,textarea::placeholder{
+  color:#5d5649 !important;
+  opacity:1 !important;
+}
+option{color:#08130c !important;background:#fffdf6 !important;}
+
+/* Dark panels: force light readable text. */
 .app-header,
 .app-header *,
 .tabbar,
@@ -84,33 +152,135 @@ textarea{
 .page-sidebar,
 .page-sidebar *,
 footer,
-footer *{
-  color:#fff3d7 !important;
+footer *,
+.drawer-topbar .close-drawer,
+.drawer-topbar .close-drawer *{
+  color:var(--readable-cream) !important;
 }
 
-/* But badges/chips on dark panels still need dark text */
+/* Muted/helper text on dark panels should not be low-contrast gray. */
+.app-header .tagline,
+.app-header .muted,
+.home-command-card p,
+.home-command-card small,
+.home-command-card .muted,
+.home-command-card .score-summary,
+.shopping-card p,
+.shopping-card small,
+.shopping-card .muted,
+.page-sidebar p,
+.page-sidebar small,
+footer span{
+  color:var(--readable-cream-muted) !important;
+}
+
+/* Eyebrows on dark panels. */
+.app-header .eyebrow,
+.home-command-card .eyebrow,
+.shopping-card .eyebrow,
+.page-sidebar .eyebrow,
+footer .eyebrow{
+  color:#f0c56d !important;
+}
+
+/* Light badges/chips/pills sitting on dark panels must keep dark text. */
 .status-pill,
 .chip,
 .date-pill,
-.shopping-card .chip,
+.score-badge,
+.app-header .status-pill,
 .home-command-card .date-pill,
-.app-header .status-pill{
-  color:#102b20 !important;
+.shopping-card .chip,
+.workspace-pills span{
+  background:#f4e6c8 !important;
+  color:#0f271d !important;
+  border-color:#d1b98e !important;
+}
+.status-pill *,
+.chip *,
+.date-pill *,
+.score-badge *,
+.workspace-pills span *{
+  color:#0f271d !important;
 }
 
+/* Buttons. */
 button,
-button *{
-  color:#fff3d7 !important;
+button span,
+button strong,
+button small{
+  color:#fff6df !important;
 }
 button.secondary,
 button.secondary *,
 .receipt-import-card button.secondary,
 .receipt-import-card button.secondary *{
-  color:#111812 !important;
+  color:#08130c !important;
 }
 
-input::placeholder,
-textarea::placeholder{
-  color:#6a6255 !important;
-  opacity:1;
+/* Specific generated blocks that were still inheriting pale text. */
+#pantryHealth,
+#pantryHealth *,
+#pantryValue,
+#pantryValue *,
+#staplesGlance,
+#staplesGlance *,
+#criticalStaples,
+#criticalStaples *,
+#storeDealsPreview,
+#storeDealsPreview *,
+#inventory,
+#inventory *,
+#groceryList,
+#groceryList *,
+#recipeIdeas,
+#recipeIdeas *,
+#scanResults,
+#scanResults *,
+#receiptReview,
+#receiptReview *,
+#receiptSummary,
+#receiptSummary *,
+#drawerCurrentStock,
+#drawerCurrentStock *,
+#drawerBuyVerdict,
+#drawerBuyVerdict *,
+#drawerStoreCompare,
+#drawerStoreCompare *,
+#drawerPurchaseLog,
+#drawerPurchaseLog *{
+  color:#08130c !important;
 }
+
+/* But generated store preview cards inside the dark shopping card are light cards, so keep their text dark. */
+.shopping-card .store-card,
+.shopping-card .store-card *,
+.shopping-card #storeDealsPreview .store-card,
+.shopping-card #storeDealsPreview .store-card *{
+  color:#08130c !important;
+}
+
+/* Dark shopping summary tiles should be light. */
+.shopping-card .shopping-summary,
+.shopping-card .shopping-summary *,
+.shopping-card .trip-value,
+.shopping-card .trip-value *{
+  color:#fff6df !important;
+}
+
+/* Score ring has cream center; make center text dark even inside dark panel. */
+.score-ring,
+.score-ring span,
+.score-ring small,
+.home-command-card .score-ring,
+.home-command-card .score-ring span,
+.home-command-card .score-ring small,
+.page-sidebar .score-ring,
+.page-sidebar .score-ring span,
+.page-sidebar .score-ring small{
+  color:#10271d !important;
+}
+
+/* Links and underlined action text. */
+a{color:#123f2a !important;font-weight:800;}
+.home-command-card a,.shopping-card a,.app-header a,.page-sidebar a,footer a{color:#fff6df !important;}
