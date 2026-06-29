@@ -3,23 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>PantryPal v2.8 · Approved Rendering</title>
+  <title>PantryPal v3 · Approved Render Rebuild</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="contrast-fixes.css">
-  <link rel="stylesheet" href="approved-render.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main class="pantrypal-app">
-    <header class="app-header">
+  <div class="forest-bg" aria-hidden="true">
+    <span class="tree t1"></span><span class="tree t2"></span><span class="tree t3"></span><span class="tree t4"></span><span class="tree t5"></span><span class="tree t6"></span>
+  </div>
+
+  <main class="app-shell">
+    <header class="app-topbar" aria-label="PantryPal header">
       <div class="brand-block">
         <div class="brand-mark" aria-hidden="true">♜</div>
-        <div>
+        <div class="brand-title">
           <h1>PantryPal</h1>
-          <p class="tagline">Rush City Edition · Mild family meals, cabin-ready staples, smarter store runs.</p>
+          <p>Rush City Edition · Mild family meals, cabin-ready staples, smarter store runs.</p>
         </div>
       </div>
-      <div class="header-actions">
+      <div class="topbar-actions">
         <p id="status" class="status-pill">Connecting...</p>
         <button class="icon-button" type="button" aria-label="Search">⌕</button>
         <button class="icon-button" type="button" aria-label="Settings">⚙</button>
@@ -35,20 +37,20 @@
       <button class="tab-button" data-tab="more" type="button"><span>•••</span> More</button>
     </nav>
 
-    <section class="tab-panel active home-panel" data-panel="home">
-      <section class="mock-dashboard">
-        <aside class="home-command-card">
-          <div class="home-command-top">
+    <section class="tab-panel active" data-panel="home">
+      <section class="home-dashboard">
+        <aside class="command-panel">
+          <div class="command-head">
             <div>
               <p class="eyebrow">Home</p>
-              <h2>Cabin stock check.</h2>
-              <p>Food on hand, dinner options, and whether your next pickup run is worth making.</p>
+              <h2 class="command-title">Cabin stock check.</h2>
+              <p class="command-copy">Food on hand, dinner options, and whether your next pickup run is worth making.</p>
             </div>
             <span class="date-pill">Today</span>
           </div>
 
-          <div class="score-metrics-card">
-            <div class="score-ring" aria-label="Pantry score"><span id="pantryScore">0</span><small id="pantryScorePill">0%</small></div>
+          <section class="score-card" aria-label="Pantry score">
+            <div class="score-ring"><span id="pantryScore">0</span><small id="pantryScorePill">0%</small></div>
             <div class="score-copy"><strong>Pantry Score</strong><p id="pantryScoreSummary">Loading pantry status.</p></div>
             <div class="mini-metrics">
               <article><small>Inventory</small><strong id="homeInventoryStat">—</strong></article>
@@ -56,52 +58,47 @@
               <article><small>Value</small><strong id="homeValueStat">—</strong></article>
               <article><small>Low</small><strong id="homeLowStat">—</strong></article>
             </div>
-          </div>
+          </section>
 
-          <article class="dinner-feature">
+          <article class="dinner-card">
             <div class="food-photo" aria-hidden="true"></div>
-            <div>
-              <p class="eyebrow">Tonight's Dinner</p>
-              <div id="tonightDinner"></div>
-            </div>
+            <p class="eyebrow">Tonight's Dinner</p>
+            <div id="tonightDinner"></div>
           </article>
 
-          <article class="left-value-card">
+          <article class="value-card">
             <p class="eyebrow">Pantry Value</p>
             <div id="pantryValue" class="value-list"></div>
           </article>
         </aside>
 
-        <section class="cream-workspace">
-          <div class="workspace-head">
+        <section class="workspace">
+          <header class="workspace-head">
             <div>
               <p class="eyebrow">Dashboard</p>
-              <h2>Family Pantry Intelligence</h2>
+              <h2 class="workspace-title">Family Pantry Intelligence</h2>
             </div>
             <div class="workspace-pills"><span>Live</span><span>Pickup-ready</span><span>Mild meals</span></div>
-          </div>
+          </header>
 
           <div class="workspace-grid">
-            <article class="ui-card food-card wide-card">
+            <article class="card wide-card">
               <div class="card-head"><div><p class="eyebrow">Food Categories</p><h3>Stock Balance</h3></div><span class="chip">Health</span></div>
               <div id="pantryHealth" class="health-list"></div>
             </article>
 
-            <article class="ui-card staples-card">
+            <article class="card">
               <div class="card-head"><div><p class="eyebrow">Staples at a Glance</p><h3>Core Items</h3></div><span class="chip">Targets</span></div>
-              <div id="staplesGlance" class="staples-grid mini-staples"></div>
+              <div id="staplesGlance" class="staples-grid"></div>
             </article>
 
-            <article class="ui-card shopping-card">
+            <article class="shopping-card">
               <div class="card-head"><div><p class="eyebrow">Store Run</p><h3>Smart Shopping</h3></div><span class="chip">Compare</span></div>
-              <div class="shopping-summary">
-                <div><small>Best guess</small><strong>Walmart + ALDI check</strong></div>
-                <div><small>Trip logic</small><strong>Only split if meat saves $8+</strong></div>
-              </div>
+              <div class="shopping-summary"><div><small>Best guess</small><strong>Walmart + ALDI check</strong></div><div><small>Trip logic</small><strong>Only split if meat saves $8+</strong></div></div>
               <div id="storeDealsPreview" class="store-preview"></div>
             </article>
 
-            <article class="ui-card critical-card">
+            <article class="card">
               <div class="card-head"><div><p class="eyebrow">Critical Low Staples</p><h3>Buy Soon</h3></div><span class="chip">Priority</span></div>
               <div id="criticalStaples" class="critical-list"></div>
             </article>
@@ -111,7 +108,7 @@
     </section>
 
     <section class="tab-panel" data-panel="inventory">
-      <section class="page-shell pantry-page">
+      <section class="page-shell">
         <aside class="page-sidebar"><p class="eyebrow">Pantry Score</p><div class="score-ring small-score"><span>87</span><small>Ready</small></div><div class="sidebar-list"><span>Pantry</span><span>Fridge</span><span>Freezer</span><span>Low Stock</span></div></aside>
         <section class="page-card inventory-card"><div class="page-head"><div><p class="eyebrow">Inventory</p><h2>Your Pantry</h2><p class="muted">Search, edit, use, and restock your pantry from one clean table.</p></div><span id="inventoryCount" class="status-pill">0 items</span></div><input id="search" class="search-input" placeholder="Search pantry, fridge, freezer, notes, or unit"><div id="inventory" class="inventory-list"></div></section>
       </section>
@@ -126,7 +123,7 @@
     </section>
 
     <section class="tab-panel" data-panel="grocery">
-      <section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList"></div></section>
+      <section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList" class="grocery-list"></div></section>
     </section>
 
     <section class="tab-panel" data-panel="more">
@@ -146,8 +143,9 @@
       </div>
     </aside>
 
-    <footer><strong>PantryPal v2.8 · Approved Rendering</strong><span>Know what you have · Buy what you need</span></footer>
+    <footer><strong>PantryPal v3 · Approved Render Rebuild</strong><span>Know what you have · Buy what you need</span></footer>
   </main>
+
   <script src="config.js"></script>
   <script src="app.js"></script>
   <script src="receipt-import.js"></script>
