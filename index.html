@@ -17,7 +17,7 @@
         <div class="brand-copy">
           <p class="edition">Rush City Edition</p>
           <h1>PantryPal</h1>
-          <p class="tagline">Mild family meals, cabin-ready staples, and local store planning.</p>
+          <p class="tagline">Mild family meals for 2 adults and kids ages 12, 10, and 8 — plus cabin-ready staples and local store planning.</p>
         </div>
       </div>
       <div class="header-actions">
@@ -42,11 +42,11 @@
           <article class="cabin-card hero-card">
             <p class="eyebrow">Cabin Dashboard</p>
             <h2>Home</h2>
-            <p class="hero-subtitle">A quick Rush City look at staples, dinner, and store planning.</p>
+            <p class="hero-subtitle">A quick Rush City look at staples, dinner, and store planning for a family of five.</p>
             <div class="hero-score-layout">
               <div class="score-ring"><span id="pantryScore">0</span><small id="pantryScorePill">0%</small></div>
               <div class="hero-stat-list">
-                <div><span>Meals Available</span><strong id="homeMealsStat">—</strong><small>meals</small></div>
+                <div><span>Meals Available</span><strong id="homeMealsStat">—</strong><small>family meals</small></div>
                 <div><span>Food Value</span><strong id="homeValueStat">—</strong><small>estimated</small></div>
                 <div><span>Low Staples</span><strong id="homeLowStat">—</strong><small>items</small></div>
               </div>
@@ -100,7 +100,7 @@
     </section>
 
     <section class="tab-panel" data-panel="recipes">
-      <section class="page-card recipe-card"><div class="page-head"><div><p class="eyebrow">Meals</p><h2>Recipe Ideas</h2><p class="muted">Default is mild, kid-friendly, and not spicy.</p></div></div><div class="preference-box"><h3>Recipe Preferences</h3><div class="grid"><label>Spice level<select id="spiceLevel"><option value="mild">Mild / not spicy</option><option value="medium">Medium</option><option value="hot">Hot</option></select></label><label>Recipe style<select id="recipeStyle"><option value="mild family friendly quick dinners">Mild family-friendly quick dinners</option><option value="kid friendly meals">Kid-friendly meals</option><option value="high protein mild meals">High-protein mild meals</option><option value="cheap pantry meals">Cheap pantry meals</option><option value="healthy simple mild meals">Healthy simple mild meals</option></select></label></div><label>Disliked or avoided ingredients<textarea id="dislikedIngredients" placeholder="spicy foods, hot sauce, jalapeños, cayenne-heavy recipes"></textarea></label><label>Favorite family meals<textarea id="favoriteMeals" placeholder="mild tacos, spaghetti, burgers, chicken rice, breakfast burritos"></textarea></label><label>Dietary notes<textarea id="dietaryNotes" placeholder="simple meals, kid-friendly, no spicy heat"></textarea></label><button id="savePreferencesBtn" type="button">Save Preferences</button><p id="preferenceStatus" class="status-text"></p></div><div class="two-col"><button id="starterRecipeBtn" type="button" class="secondary">Show Built-in Recipes</button><button id="recipeBtn" type="button">Get AI Recipe Ideas</button></div><p id="recipeStatus" class="status-text"></p><div id="recipeIdeas" class="recipe-list"></div></section>
+      <section class="page-card recipe-card"><div class="page-head"><div><p class="eyebrow">Meals</p><h2>Recipe Ideas</h2><p class="muted">Default is mild, kid-friendly, not spicy, and sized for 2 adults plus kids ages 12, 10, and 8.</p></div></div><div class="preference-box"><h3>Recipe Preferences</h3><p class="muted">Household default: family of five — 2 adults, one 12-year-old, one 10-year-old, and one 8-year-old.</p><div class="grid"><label>Spice level<select id="spiceLevel"><option value="mild">Mild / not spicy</option><option value="medium">Medium</option><option value="hot">Hot</option></select></label><label>Recipe style<select id="recipeStyle"><option value="mild family friendly quick dinners sized for 2 adults and kids ages 12 10 and 8">Mild family-of-five quick dinners</option><option value="kid friendly meals for 2 adults and 3 kids">Kid-friendly meals</option><option value="high protein mild meals for a family of five">High-protein mild meals</option><option value="cheap pantry meals for a family of five">Cheap pantry meals</option><option value="healthy simple mild meals for a family of five">Healthy simple mild meals</option></select></label></div><label>Disliked or avoided ingredients<textarea id="dislikedIngredients" placeholder="spicy foods, hot sauce, jalapeños, cayenne-heavy recipes"></textarea></label><label>Favorite family meals<textarea id="favoriteMeals" placeholder="mild tacos, spaghetti, burgers, chicken rice, breakfast burritos"></textarea></label><label>Dietary notes<textarea id="dietaryNotes" placeholder="simple family-of-five meals, kid-friendly, no spicy heat, 2 adults and kids ages 12, 10, and 8"></textarea></label><button id="savePreferencesBtn" type="button">Save Preferences</button><p id="preferenceStatus" class="status-text"></p></div><div class="two-col"><button id="starterRecipeBtn" type="button" class="secondary">Show Built-in Recipes</button><button id="recipeBtn" type="button">Get AI Recipe Ideas</button></div><p id="recipeStatus" class="status-text"></p><div id="recipeIdeas" class="recipe-list"></div></section>
     </section>
 
     <section class="tab-panel" data-panel="addscan">
@@ -108,17 +108,17 @@
     </section>
 
     <section class="tab-panel" data-panel="grocery">
-      <section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList" class="grocery-list"></div></section>
+      <section class="page-card grocery-card"><div class="page-head"><div><p class="eyebrow">Shopping</p><h2>Grocery List</h2><p class="muted">Low-stock flags, target gaps, and manual items roll up here for the family.</p></div></div><div class="manual-grocery"><input id="manualGroceryName" placeholder="Add grocery item"><button id="manualGroceryBtn" type="button">Add to List</button></div><div id="groceryList" class="grocery-list"></div></section>
     </section>
 
     <section class="tab-panel" data-panel="more">
-      <section class="page-grid"><section class="page-card"><div class="page-head"><div><p class="eyebrow">Settings</p><h2>Rush City Edition</h2><p class="muted">Staple targets are configurable and stored on this device.</p></div><button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button></div><div id="stapleTargetEditor" class="target-editor"></div></section></section>
+      <section class="page-grid"><section class="page-card"><div class="page-head"><div><p class="eyebrow">Settings</p><h2>Rush City Family Edition</h2><p class="muted">Staple targets are configurable and stored on this device.</p></div><button id="resetStaplesBtn" class="secondary small" type="button">Reset Targets</button></div><div id="stapleTargetEditor" class="target-editor"></div></section></section>
     </section>
 
     <div id="itemDrawerBackdrop" class="drawer-backdrop hidden" onclick="closeItemDrawer()" aria-hidden="true"></div>
     <aside id="itemDrawer" class="item-drawer" aria-hidden="true" aria-label="Item details and price history"><div class="drawer-topbar"><div><p class="eyebrow">Item Intelligence</p><h2 id="drawerItemName">Item Details</h2><p id="drawerItemSub" class="muted">Inventory, purchase history, and store comparison.</p></div><button class="icon-button close-drawer" type="button" onclick="closeItemDrawer()" aria-label="Close item details">×</button></div><div class="drawer-grid"><section class="drawer-card current-stock-card"><p class="eyebrow">Current Stock</p><div id="drawerCurrentStock" class="stock-snapshot"></div></section><section class="drawer-card buy-verdict-card"><p class="eyebrow">Buy Recommendation</p><div id="drawerBuyVerdict"></div></section><section class="drawer-card chart-card"><div class="drawer-section-head"><div><p class="eyebrow">Price History</p><h3 id="drawerChartTitle">$/unit over time</h3></div><span id="drawerPriceBasis" class="chip">price book</span></div><div id="drawerPriceChart" class="price-chart"></div></section><section class="drawer-card store-compare-card"><p class="eyebrow">Store Comparison</p><div id="drawerStoreCompare" class="store-compare-list"></div></section><section class="drawer-card purchase-log-card"><p class="eyebrow">Purchase Log</p><div id="drawerPurchaseLog" class="purchase-log"></div></section><section class="drawer-card add-price-card"><p class="eyebrow">Add Price Point</p><div class="price-entry-grid"><label>Store<select id="priceStore"><option>Walmart Pine City</option><option>ALDI Pine City</option><option>Walmart Cambridge</option><option>ALDI Cambridge</option><option>Costco Coon Rapids</option><option>Coborn’s Pine City</option></select></label><label>Date<input id="priceDate" type="date"></label><label>Total price<input id="priceTotal" type="number" step="0.01" placeholder="23.02"></label><label>Amount / weight<input id="priceAmount" type="number" step="0.01" placeholder="9.28"></label><label>Unit<select id="priceUnit"><option>lb</option><option>each</option><option>gallon</option><option>oz</option><option>pack</option></select></label><button id="savePriceRecordBtn" type="button">Save Price Point</button></div><p class="muted">Use this for receipt values until Walmart/ALDI receipt import is wired in.</p></section></div></aside>
 
-    <footer><strong>PantryPal · Log Cabin Dashboard</strong><span>Know what you have · Buy what you need</span></footer>
+    <footer><strong>PantryPal · Family Cabin Dashboard</strong><span>Know what you have · Buy what your family needs</span></footer>
   </main>
   <script src="config.js"></script>
   <script src="app.js"></script>
