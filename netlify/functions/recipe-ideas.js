@@ -2,7 +2,7 @@ exports.handler=async function(event){
  if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
  if(!process.env.OPENAI_API_KEY)return json(500,{error:"Missing OPENAI_API_KEY in Netlify environment variables"});
  try{
-  const {inventory=[],style="mild family friendly quick dinners",preferences={}}=JSON.parse(event.body||"{}");
+  const {inventory=[],style="mild family friendly quick dinners",preferences={},familyProfile={}}=JSON.parse(event.body||"{}");
   if(!Array.isArray(inventory)||!inventory.length)return json(400,{error:"Missing inventory"});
   const compactInventory=inventory.slice(0,80).map(i=>({
    name:String(i.name||"").slice(0,80),
@@ -20,12 +20,27 @@ exports.handler=async function(event){
    dietaryNotes:String(preferences.dietaryNotes||"simple, kid-friendly, mild meals with no spicy heat")
   };
 
+  const family={
+   adults:Number(familyProfile.adults)||2,
+   childAges:Array.isArray(familyProfile.children)?familyProfile.children.map(c=>Number(c.age)).filter(Boolean):[12,10,8],
+   adultPortionEquivalent:Number(familyProfile.adultPortionEquivalent)||4.4,
+   label:String(familyProfile.label||"Family of 5")
+  };
+
   const prompt=`You are helping a busy parent plan simple meals from pantry inventory.
 
 Recipe source rules:
 - Do not scrape or quote recipe websites.
 - Use only built-in cooking knowledge, the inventory below, and the family's saved preferences.
 - Keep recipes practical and original, not copied from a site.
+
+Family size and quantity rules:
+- Plan every recipe for ${family.label}: ${family.adults} adults plus kids ages ${family.childAges.join(", ")}.
+- Treat this as about ${family.adultPortionEquivalent} adult-size dinner servings.
+- Every recipe MUST include ingredient_lines with exact practical quantities, such as "2 lb ground beef", "10 small tortillas", "2 cups shredded cheese", or "1 bag frozen vegetables".
+- Quantities must be enough for the family size, with normal leftovers okay but not huge batch-cooking unless the style asks for it.
+- The use array should also include quantity text, not just ingredient names.
+- The missing array should include quantity text for any missing items.
 
 Family preferences:
 - Spice level: ${prefs.spiceLevel}
@@ -50,13 +65,14 @@ Suggest 4 practical recipe ideas using the provided inventory. Style: ${style}. 
       name:{type:"string"},
       time:{type:"string"},
       why:{type:"string"},
+      ingredient_lines:{type:"array",items:{type:"string"}},
       use:{type:"array",items:{type:"string"}},
       missing:{type:"array",items:{type:"string"}},
       steps:{type:"array",items:{type:"string"}}
-     },required:["name","time","why","use","missing","steps"]}}},
+     },required:["name","time","why","ingredient_lines","use","missing","steps"]}}},
      required:["recipes"]
     }}},
-    max_output_tokens:1200
+    max_output_tokens:1500
    })
   });
   const raw=await response.text();
