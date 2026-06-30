@@ -10,7 +10,23 @@
 
   let panelReady=false;
   document.addEventListener('DOMContentLoaded',()=>setTimeout(initFamilyTools,300));
+  document.addEventListener('DOMContentLoaded',loadRecipeToolsAssets);
   window.addEventListener('pantrypal:refresh-family-tools',()=>renderFamilyTools());
+
+  function loadRecipeToolsAssets(){
+    if(!document.querySelector('link[href="pantrypal-recipe-tools.css"]')){
+      const css=document.createElement('link');
+      css.rel='stylesheet';
+      css.href='pantrypal-recipe-tools.css';
+      document.head.appendChild(css);
+    }
+    if(!document.querySelector('script[src="pantrypal-recipe-tools.js"]')){
+      const script=document.createElement('script');
+      script.src='pantrypal-recipe-tools.js';
+      script.defer=true;
+      document.body.appendChild(script);
+    }
+  }
 
   function initFamilyTools(){
     const hero=document.querySelector('.hero-card');
