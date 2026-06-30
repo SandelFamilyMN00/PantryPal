@@ -16,33 +16,53 @@
     mod.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
     window.pdfjsLib = mod;
     const pdf = await mod.getDocument({ data: await file.arrayBuffer() }).promise;
-    const out = [];
+    const pageLines = [];
+
     for(let p = 1; p <= pdf.numPages; p++){
       const page = await pdf.getPage(p);
-      const txt = await page.getTextContent();
-      out.push(txt.items.map(x => x.str).join('\n'));
+      const content = await page.getTextContent();
+
+      // Group text spans by their Y position (row), tolerance 3 pts
+      const rowMap = new Map();
+      for(const item of content.items){
+        if(!item.str || !item.str.trim()) continue;
+        // PDF Y increases upward; round to nearest 3pt bucket
+        const y = Math.round(item.transform[5] / 3) * 3;
+        if(!rowMap.has(y)) rowMap.set(y, []);
+        rowMap.get(y).push({ x: item.transform[4], str: item.str });
+      }
+
+      // Sort rows top-to-bottom (highest Y first in PDF coords)
+      const sortedRows = [...rowMap.entries()]
+        .sort((a, b) => b[0] - a[0])
+        .map(([, spans]) =>
+          // Sort spans left-to-right within each row, join with space
+          spans.sort((a, b) => a.x - b.x).map(s => s.str).join(' ').replace(/\s+/g, ' ').trim()
+        )
+        .filter(Boolean);
+
+      pageLines.push(...sortedRows);
     }
-    return out.join('\n');
+
+    return pageLines.join('\n');
   }
 
   function setup(){
     const fileInput = $('receiptFileInput');
-
-    // Expand file input to accept PDFs
     fileInput.accept = 'image/*,.pdf,application/pdf,.txt,.csv';
     if($('receiptPhotoBtn')) $('receiptPhotoBtn').textContent = 'Upload Receipt Photo / PDF';
 
-    // PDF only — extract text into textarea, then let walmart-receipt-fix.js parse it
+    // PDF only — extract text row by row into textarea, then let walmart-receipt-fix.js parse
     fileInput.addEventListener('change', async e => {
       const f = e.target.files && e.target.files[0];
       if(!f) return;
       const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
-      if(!isPdf) return; // non-PDFs handled by receipt-import.js
+      if(!isPdf) return;
       try {
         if($('receiptFileStatus')) $('receiptFileStatus').textContent = `Selected PDF: ${f.name}`;
         $('receiptStatus').textContent = 'Reading PDF receipt...';
         $('receiptText').value = await pdfText(f);
-        $('receiptStatus').textContent = 'PDF text extracted. Click Parse Receipt.';
+        $('receiptStatus').textContent = 'PDF loaded. Click Parse Receipt.';
       } catch(err){
         $('receiptStatus').textContent = 'Could not read PDF: ' + err.message;
       }
